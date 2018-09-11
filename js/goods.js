@@ -191,6 +191,16 @@ function getClassOnRating(itemRating) {
   return className;
 }
 
+function getSugarStatusString(flag) {
+  var sugarStatusString = 'Без сахара. ';
+
+  if (flag) {
+    sugarStatusString = 'Содержит сахар. ';
+  }
+
+  return sugarStatusString;
+}
+
 function makeCatalogItem(itemData) {
   var item = CATALOG_ITEM_TEMPLATE.cloneNode(true);
 
@@ -219,12 +229,9 @@ function makeCatalogItem(itemData) {
   item.querySelector('.star__count').textContent =
     '(' + itemData.rating.number + ')';
 
-  var sugarStatus = 'Без сахара. ';
-  if (itemData.nutritionFacts.sugar) {
-    sugarStatus = 'Содержит сахар. ';
-  }
   item.querySelector('.card__characteristic').textContent =
-    sugarStatus + itemData.nutritionFacts.energy + ' ккал';
+    getSugarStatusString(itemData.nutritionFacts.sugar)
+    + itemData.nutritionFacts.energy + ' ккал';
 
   item.querySelector('.card__composition-list').textContent =
     itemData.contents;

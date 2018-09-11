@@ -155,17 +155,23 @@ function getEndingForWordAfterNumber(number) {
   return ending;
 }
 
+function getClassOnQuantity(itemAmount) {
+  var className = 'card--soon';
+
+  if (itemAmount >= 1 && itemAmount <= 5) {
+    className = 'card--little';
+  } else if (itemAmount > 5) {
+    className = 'card--in-stock';
+  }
+
+  return className;
+}
+
 function makeCatalogItem(itemData) {
   var item = CATALOG_ITEM_TEMPLATE.cloneNode(true);
 
   item.classList.remove('card--in-stock');// fix error in template
-  if (itemData.amount > 5) {
-    item.classList.add('card--in-stock');
-  } else if (itemData.amount >= 1 && itemData.amount <= 5) {
-    item.classList.add('card--little');
-  } else {
-    item.classList.add('card--soon');
-  }
+  item.classList.add(getClassOnQuantity(itemData.amount));
 
   item.querySelector('.card__title').textContent = itemData.name;
   var itemImage = item.querySelector('.card__img');

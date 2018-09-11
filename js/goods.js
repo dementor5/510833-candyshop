@@ -167,6 +167,30 @@ function getClassOnQuantity(itemAmount) {
   return className;
 }
 
+function getClassOnRating(itemRating) {
+  var className = '';
+
+  switch (itemRating) {
+    case 1:
+      className = 'stars__rating-one';
+      break;
+    case 2:
+      className = 'stars__rating-two';
+      break;
+    case 3:
+      className = 'stars__rating-three';
+      break;
+    case 4:
+      className = 'stars__rating-four';
+      break;
+    case 5:
+      className = 'stars__rating-five';
+      break;
+  }
+
+  return className;
+}
+
 function makeCatalogItem(itemData) {
   var item = CATALOG_ITEM_TEMPLATE.cloneNode(true);
 
@@ -190,17 +214,7 @@ function makeCatalogItem(itemData) {
     + getEndingForWordAfterNumber(itemData.rating.value);
 
   ratingElement.classList.remove('stars__rating--five');// fix error in template
-  if (itemData.rating.value === 1) {
-    ratingElement.classList.add('stars__rating-one');
-  } else if (itemData.rating.value === 2) {
-    ratingElement.classList.add('stars__rating-two');
-  } else if (itemData.rating.value === 3) {
-    ratingElement.classList.add('stars__rating-three');
-  } else if (itemData.rating.value === 4) {
-    ratingElement.classList.add('stars__rating-four');
-  } else if (itemData.rating.value === 5) {
-    ratingElement.classList.add('stars__rating-five');
-  }
+  ratingElement.classList.add(getClassOnRating(itemData.rating.value));
 
   item.querySelector('.star__count').textContent =
     '(' + itemData.rating.number + ')';

@@ -145,6 +145,16 @@ function getProductsData(count) {
   return productsData;
 }
 
+function getEndingForWordAfterNumber(number) {
+  var ending = '';
+  if (number === 1) {
+    ending = 'а';
+  } else if (number > 1 && number < 5) {
+    ending = 'ы';
+  }
+  return ending;
+}
+
 function makeCatalogItem(itemData) {
   var item = CATALOG_ITEM_TEMPLATE.cloneNode(true);
 
@@ -169,14 +179,9 @@ function makeCatalogItem(itemData) {
 
   var ratingElement = item.querySelector('.stars__rating');
 
-  var lastWord = ' звёзда';
-  if (itemData.rating.value > 1 && itemData.rating.value < 5) {
-    lastWord = ' звёзды';
-  } else if (itemData.rating.value === 5) {
-    lastWord = ' звёзд';
-  }
   ratingElement.textContent =
-    'Рейтинг: ' + itemData.rating.value + lastWord;
+    'Рейтинг: ' + itemData.rating.value + ' звезд'
+    + getEndingForWordAfterNumber(itemData.rating.value);
 
   ratingElement.classList.remove('stars__rating--five');// fix error in template
   if (itemData.rating.value === 1) {

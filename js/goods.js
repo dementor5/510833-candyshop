@@ -86,6 +86,10 @@ var PRODUCTS_PICTURES_PATH = 'img/cards/';
 var CATALOG_ITEMS_COUNT = 26;
 var BASKET_ITEMS_COUNT = 3;
 var RUBLE_SIGN = '₽';
+var CATALOG_ITEM_TEMPLATE = document.querySelector('#card')
+    .content.querySelector('.catalog__card');
+var BASKET_ITEM_TEMPLATE = document.querySelector('#card-order')
+    .content.querySelector('.goods_card');
 
 function getRandomInRange(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -141,15 +145,8 @@ function getProductsData(count) {
   return productsData;
 }
 
-function getElementFromTemplate(templateSelector, contentSelector) {
-  var template = document.querySelector(templateSelector)
-    .content.querySelector(contentSelector);
-
-  return template.cloneNode(true);
-}
-
 function makeCatalogItem(itemData) {
-  var item = getElementFromTemplate('#card', '.catalog__card');
+  var item = CATALOG_ITEM_TEMPLATE.cloneNode(true);
 
   item.classList.remove('card--in-stock');// fix error in template
   if (itemData.amount > 5) {
@@ -211,7 +208,7 @@ function makeCatalogItem(itemData) {
 }
 
 function makeBasketItem(itemData) {
-  var item = getElementFromTemplate('#card-order', '.goods_card');
+  var item = BASKET_ITEM_TEMPLATE.cloneNode(true);
 
   item.querySelector('.card-order__title').textContent = itemData.name;
   var itemImage = item.querySelector('.card-order__img');

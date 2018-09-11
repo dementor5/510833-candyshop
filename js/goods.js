@@ -99,10 +99,7 @@ function getRandomArrayElement(array) {
 }
 
 function getRandomBool() {
-  if (getRandomInRange(0, 1)) {
-    return true;
-  }
-  return false;
+  return Boolean(getRandomInRange(0, 1));
 }
 
 function generateComposition() {

@@ -252,11 +252,11 @@ function makeBasketItem(itemData) {
   return item;
 }
 
-function makePackOfElements(data, element) {
+function makePackOfElements(data, getElement) {
   var fragment = document.createDocumentFragment();
 
   for (var i = 0; i < data.length; i++) {
-    fragment.appendChild(element(data[i]));
+    fragment.appendChild(getElement(data[i]));
   }
 
   return fragment;

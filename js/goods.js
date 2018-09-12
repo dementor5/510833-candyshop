@@ -86,14 +86,15 @@ var PRODUCTS_PICTURES_PATH = 'img/cards/';
 var CATALOG_ITEMS_COUNT = 26;
 var BASKET_ITEMS_COUNT = 3;
 var RUBLE_SIGN = '₽';
-var CATALOG_ITEM_TEMPLATE = document.querySelector('#card')
+
+var catalogItemTemplate = document.querySelector('#card')
     .content.querySelector('.catalog__card');
-var BASKET_ITEM_TEMPLATE = document.querySelector('#card-order')
+var basketItemTemplate = document.querySelector('#card-order')
     .content.querySelector('.goods_card');
-var CATALOG_CARDS = document.querySelector('.catalog__cards');
-var CATALOG_LOAD = CATALOG_CARDS.querySelector('.catalog__load');
-var GOODS_CARDS = document.querySelector('.goods__cards');
-var GOODS_CARD_EMPTY = GOODS_CARDS.querySelector('.goods__card-empty');
+var catalogCards = document.querySelector('.catalog__cards');
+var catalogLoad = catalogCards.querySelector('.catalog__load');
+var goodsCards = document.querySelector('.goods__cards');
+var goodsCardEmpty = goodsCards.querySelector('.goods__card-empty');
 
 function getRandomInRange(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -200,7 +201,7 @@ function getSugarStatusString(flag) {
 }
 
 function makeCatalogItem(itemData) {
-  var item = CATALOG_ITEM_TEMPLATE.cloneNode(true);
+  var item = catalogItemTemplate.cloneNode(true);
 
   item.classList.remove('card--in-stock');// fix error in template
   item.classList.add(getClassOnQuantity(itemData.amount));
@@ -238,7 +239,7 @@ function makeCatalogItem(itemData) {
 }
 
 function makeBasketItem(itemData) {
-  var item = BASKET_ITEM_TEMPLATE.cloneNode(true);
+  var item = basketItemTemplate.cloneNode(true);
 
   item.querySelector('.card-order__title').textContent = itemData.name;
   var itemImage = item.querySelector('.card-order__img');
@@ -261,20 +262,20 @@ function makePackOfElements(data, getElement) {
 }
 
 function renderCatalog() {
-  CATALOG_CARDS.classList.remove('catalog__cards--load');
-  CATALOG_LOAD.classList.add('visually-hidden');
+  catalogCards.classList.remove('catalog__cards--load');
+  catalogLoad.classList.add('visually-hidden');
   var catalogItemsData = getProductsData(CATALOG_ITEMS_COUNT);
   var packOfCatalogItems =
     makePackOfElements(catalogItemsData, makeCatalogItem);
-  CATALOG_CARDS.appendChild(packOfCatalogItems);
+  catalogCards.appendChild(packOfCatalogItems);
 }
 
 function renderBasket() {
-  GOODS_CARDS.classList.remove('goods__cards--empty');
-  GOODS_CARD_EMPTY.classList.add('visually-hidden');
+  goodsCards.classList.remove('goods__cards--empty');
+  goodsCardEmpty.classList.add('visually-hidden');
   var basketItemsData = getProductsData(BASKET_ITEMS_COUNT);
   var packOfBasketItems = makePackOfElements(basketItemsData, makeBasketItem);
-  GOODS_CARDS.appendChild(packOfBasketItems);
+  goodsCards.appendChild(packOfBasketItems);
 }
 
 renderCatalog();

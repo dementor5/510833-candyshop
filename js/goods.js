@@ -196,13 +196,7 @@ function getClassOnRating(itemRating) {
 }
 
 function getSugarStatusString(flag) {
-  var sugarStatusString = 'Без сахара. ';
-
-  if (flag) {
-    sugarStatusString = 'Содержит сахар. ';
-  }
-
-  return sugarStatusString;
+  return flag ? 'Содержит сахар. ' : 'Без сахара. ';
 }
 
 function makeCatalogItem(itemData) {

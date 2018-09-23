@@ -30,7 +30,6 @@ var PRODUCT_NAMES = [
   'Бельгийское пенное',
   'Острый язычёк'
 ];
-
 var PRODUCT_PICTURES = [
   'gum-cedar.jpg',
   'gum-chile.jpg',
@@ -61,7 +60,6 @@ var PRODUCT_PICTURES = [
   'soda-peanut-grapes.jpg',
   'soda-russian.jpg'
 ];
-
 var PRODUCT_INGREDIENTS = [
   'сливки',
   'вода',
@@ -81,34 +79,358 @@ var PRODUCT_INGREDIENTS = [
   'вилларибо',
   'виллабаджо'
 ];
-
 var PRODUCTS_PICTURES_PATH = 'img/cards/';
-var CATALOG_ITEMS_COUNT = 26;
-var BASKET_ITEMS_COUNT = 3;
-var RUBLE_SIGN = '₽';
+var CATALOG_CARDS_COUNT = 26;
+var CURRENCY_SIGN = '₽';
 
-var catalogItemTemplate = document.querySelector('#card')
+var catalogCardTemplate = document.querySelector('#card')
     .content.querySelector('.catalog__card');
-var basketItemTemplate = document.querySelector('#card-order')
+var basketCardTemplate = document.querySelector('#card-order')
     .content.querySelector('.goods_card');
-var catalogCards = document.querySelector('.catalog__cards');
-var catalogLoad = catalogCards.querySelector('.catalog__load');
-var goodsCards = document.querySelector('.goods__cards');
-var goodsCardEmpty = goodsCards.querySelector('.goods__card-empty');
+var catalog = document.querySelector('.catalog__cards');
+var catalogLoad = catalog.querySelector('.catalog__load');
+var basket = document.querySelector('.goods__cards');
+var goodsCardEmpty = basket.querySelector('.goods__card-empty');
+var mainHeaderBasketLink = document.querySelector('.main-header__basket');
+var productsInCatalog = getRandomProducts(CATALOG_CARDS_COUNT);
+var productsInBasket = [];
+var payment = document.querySelector('.payment');
+var paymentCardTab = payment.querySelector('.payment__card-wrap');
+var paymentCashTab = payment.querySelector('.payment__cash-wrap');
+var deliver = document.querySelector('.deliver');
+var deliverStore = deliver.querySelector('.deliver__store');
+var deliverCourier = deliver.querySelector('.deliver__courier');
+var slider = document.querySelector('.range');
+var rangeButtons = slider.querySelectorAll('.range__btn');
+var rangePriceMin = slider.querySelector('.range__price--min');
+var rangePriceMax = slider.querySelector('.range__price--max');
 
-function getRandomInRange(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+renderCatalog();
+
+var catalogCards = catalog.querySelectorAll('.catalog__card');
+addListenersOnEachFavoritButtonInCatalog();
+addListenersOnEachCardInCatalog();
+addListenerOnPaymentButtons();
+addListenerOnDeliverButtons();
+addListenersOnSlider();
+
+function renderCatalog() {
+  catalog.classList.remove('catalog__cards--load');
+  catalogLoad.classList.add('visually-hidden');
+  var fragmentWithCatalogCards =
+    getFragmentWithCards(productsInCatalog, makeCatalogCard);
+  catalog.appendChild(fragmentWithCatalogCards);
 }
 
-function getRandomArrayElement(array) {
-  var min = 0;
-  var max = array.length - 1;
-  var randomIndex = getRandomInRange(min, max);
-  return array[randomIndex];
+function addListenersOnEachFavoritButtonInCatalog() {
+  var favoriteButtons = catalog.querySelectorAll('.card__btn-favorite');
+
+  for (var i = 0; i < favoriteButtons.length; i++) {
+    favoriteButtons[i].addEventListener('click', function (evt) {
+      evt.preventDefault();
+      evt.target.classList.toggle('card__btn-favorite--selected');
+    });
+  }
 }
 
-function getRandomBool() {
-  return Boolean(getRandomInRange(0, 1));
+function addListenersOnEachCardInCatalog() {
+  for (var i = 0; i < catalogCards.length; i++) {
+    catalogCards[i].addEventListener('click', function (evt) {
+      if (evt.target.classList.contains('card__btn')) {
+        evt.preventDefault();
+        var currentCard = evt.currentTarget;
+        var cardTitle = currentCard.querySelector('.card__title').textContent;
+        var product = getProductByName(cardTitle, productsInCatalog);
+
+        if (product.amount) {
+          addProductToBasket(product);
+          product.amount--;
+          setAmountClass(currentCard, product.amount);
+          setHeaderBasketLinkMessage();
+          renderBasket();
+        }
+      }
+    });
+  }
+}
+
+function addListenerOnPaymentButtons() {
+  payment.addEventListener('change', function (evt) {
+    if (evt.target.classList.contains('toggle-btn__input')) {
+      if (evt.target.id === 'payment__cash') {
+        paymentCardTab.classList.add('visually-hidden');
+        paymentCashTab.classList.remove('visually-hidden');
+      } else {
+        paymentCardTab.classList.remove('visually-hidden');
+        paymentCashTab.classList.add('visually-hidden');
+      }
+    }
+  });
+}
+
+function addListenerOnDeliverButtons() {
+  deliver.addEventListener('change', function (evt) {
+    if (evt.target.classList.contains('toggle-btn__input')) {
+      if (evt.target.id === 'deliver__courier') {
+        deliverStore.classList.add('visually-hidden');
+        deliverCourier.classList.remove('visually-hidden');
+      } else {
+        deliverStore.classList.remove('visually-hidden');
+        deliverCourier.classList.add('visually-hidden');
+      }
+    }
+  });
+}
+
+function addListenersOnSlider() {
+  for (var i = 0; i < rangeButtons.length; i++) {
+    rangeButtons[i].style.zIndex = 100; // fix for left pin
+    rangeButtons[i].addEventListener('mouseup', function (evt) {
+      if (evt.target.classList.contains('range__btn--left')) {
+        evt.target.style.left = '30%';
+        rangePriceMin.textContent = evt.target.style.left.slice(0, -1);
+      } else {
+        evt.target.style.left = '70%';
+        rangePriceMax.textContent = evt.target.style.left.slice(0, -1);
+      }
+    });
+  }
+}
+
+function addProductToBasket(product) {
+  var basketProduct = getProductByName(product.name, productsInBasket);
+  if (basketProduct) {
+    basketProduct.orderedAmount++;
+    basketProduct.alreadyOrdered = basketProduct.orderedAmount;
+  } else {
+    basketProduct = Object.assign({}, product);
+    delete basketProduct.contents;
+    delete basketProduct.nutritionFacts;
+    delete basketProduct.rating;
+    delete basketProduct.weight;
+    basketProduct.orderedAmount = 1;
+    basketProduct.alreadyOrdered = basketProduct.orderedAmount;
+    productsInBasket.push(basketProduct);
+  }
+}
+
+function renderBasket() {
+  removeAllCardsInBasket();
+  checkBasketMessage();
+  addCardsToBasket();
+  addListenersOnEachCardInBasket();
+}
+
+function removeAllCardsInBasket() {
+  var cardsInBasket = basket.querySelectorAll('.goods_card');
+  if (cardsInBasket.length) {
+    for (var i = 0; i < cardsInBasket.length; i++) {
+      cardsInBasket[i].remove();
+    }
+  }
+}
+
+function checkBasketMessage() {
+  if (productsInBasket.length) {
+    basket.classList.remove('goods__cards--empty');
+    goodsCardEmpty.classList.add('visually-hidden');
+  } else {
+    basket.classList.add('goods__cards--empty');
+    goodsCardEmpty.classList.remove('visually-hidden');
+  }
+}
+
+function addCardsToBasket() {
+  var fragmentWithProductsForBasket =
+    getFragmentWithCards(productsInBasket, makeBasketCard);
+  basket.appendChild(fragmentWithProductsForBasket);
+}
+
+function addListenersOnEachCardInBasket() {
+  var cardsInBasket = basket.querySelectorAll('.goods_card');
+  for (var i = 0; i < cardsInBasket.length; i++) {
+
+    cardsInBasket[i].addEventListener('click', function (evt) {
+      if (evt.target.classList.contains('card-order__btn--decrease')) {
+        var cardTitle =
+          evt.currentTarget.querySelector('.card-order__title').textContent;
+        var basketProduct = getProductByName(cardTitle, productsInBasket);
+        var catalogProduct = getProductByName(cardTitle, productsInCatalog);
+        var catalogCard = getCatalogCardByName(cardTitle);
+
+        if (basketProduct.orderedAmount > 1) {
+          basketProduct.orderedAmount--;
+          basketProduct.alreadyOrdered = basketProduct.orderedAmount;
+          catalogProduct.amount++;
+        } else {
+          deleteProductFromBasket(cardTitle);
+        }
+        setAmountClass(catalogCard, catalogProduct.amount);
+        setHeaderBasketLinkMessage();
+        renderBasket();
+      }
+    });
+
+    cardsInBasket[i].addEventListener('click', function (evt) {
+      if (evt.target.classList.contains('card-order__btn--increase')) {
+        var cardTitle =
+          evt.currentTarget.querySelector('.card-order__title').textContent;
+        var catalogProduct = getProductByName(cardTitle, productsInCatalog);
+        var basketProduct = getProductByName(cardTitle, productsInBasket);
+        var catalogCard = getCatalogCardByName(cardTitle);
+
+        if (catalogProduct.amount > 0) {
+          catalogProduct.amount--;
+          basketProduct.orderedAmount++;
+          basketProduct.alreadyOrdered = basketProduct.orderedAmount;
+          setAmountClass(catalogCard, catalogProduct.amount);
+          setHeaderBasketLinkMessage();
+          renderBasket();
+        }
+      }
+    });
+
+    cardsInBasket[i].addEventListener('click', function (evt) {
+      if (evt.target.classList.contains('card-order__close')) {
+        evt.preventDefault();
+        var cardTitle =
+          evt.currentTarget.querySelector('.card-order__title').textContent;
+        var catalogProduct = getProductByName(cardTitle, productsInCatalog);
+        var catalogCard = getCatalogCardByName(cardTitle);
+
+        deleteProductFromBasket(cardTitle);
+        setAmountClass(catalogCard, catalogProduct.amount);
+        setHeaderBasketLinkMessage();
+        renderBasket();
+      }
+    });
+
+    cardsInBasket[i].addEventListener('input', function (evt) {
+      if (evt.target.classList.contains('card-order__count')) {
+        var cardTitle =
+          evt.currentTarget.querySelector('.card-order__title').textContent;
+        var basketProduct = getProductByName(cardTitle, productsInBasket);
+        var catalogProduct = getProductByName(cardTitle, productsInCatalog);
+        var sumAvailableAndInBasket =
+          catalogProduct.amount + basketProduct.orderedAmount;
+        var catalogCard = getCatalogCardByName(cardTitle);
+
+        if (evt.target.value > sumAvailableAndInBasket) {
+          evt.target.value = sumAvailableAndInBasket;
+        } else if (evt.target.value < 0) {
+          evt.target.value = 0;
+        }
+
+        var difference = evt.target.value - basketProduct.alreadyOrdered;
+        catalogProduct.amount -= difference;
+        basketProduct.orderedAmount += difference;
+        basketProduct.alreadyOrdered = basketProduct.orderedAmount;
+
+        setAmountClass(catalogCard, catalogProduct.amount);
+        setHeaderBasketLinkMessage();
+        if (evt.target.value === '0') {
+          deleteProductFromBasket(cardTitle);
+          renderBasket();
+        }
+      }
+    });
+
+  }
+}
+
+function deleteProductFromBasket(cardTitle) {
+  var catalogProduct = getProductByName(cardTitle, productsInCatalog);
+  var basketProduct = getProductByName(cardTitle, productsInBasket);
+  var basketProductIndex = getProductIndexByName(cardTitle, productsInBasket);
+
+  catalogProduct.amount += basketProduct.orderedAmount;
+  productsInBasket.splice(basketProductIndex, 1);
+}
+
+function getProductByName(name, products) {
+  for (var i = 0; i < products.length; i++) {
+    if (products[i].name === name) {
+      return products[i];
+    }
+  }
+  return false;
+}
+
+function getProductIndexByName(name, products) {
+  for (var i = 0; i < products.length; i++) {
+    if (products[i].name === name) {
+      return i;
+    }
+  }
+  return false;
+}
+
+function getCatalogCardByName(name) {
+  for (var i = 0; i < catalogCards.length; i++) {
+    if (catalogCards[i].querySelector('.card__title').textContent === name) {
+      return catalogCards[i];
+    }
+  }
+  return false;
+}
+
+function setHeaderBasketLinkMessage() {
+  var message = 'В корзине ничего нет';
+  if (productsInBasket.length) {
+    var productsCount = 0;
+    var totalPrice = 0;
+
+    for (var i = 0; i < productsInBasket.length; i++) {
+      productsCount += productsInBasket[i].orderedAmount;
+      var totalPositionPrice = productsInBasket[i].orderedAmount
+        * productsInBasket[i].price;
+      totalPrice += totalPositionPrice;
+
+    }
+    message = 'В корзине ' + productsCount
+      + ' товар' + getEndingForProductWord(productsCount)
+      + ' на сумму ' + totalPrice + ' ' + CURRENCY_SIGN;
+  }
+  mainHeaderBasketLink.textContent = message;
+}
+
+function getEndingForProductWord(productCount) {
+  var ending = '';
+
+  if (productCount > 1 && productCount < 5) {
+    ending = 'а';
+  } else if (productCount >= 5) {
+    ending = 'ов';
+  }
+
+  return ending;
+}
+
+function getRandomProducts(count) {
+  var randomProducts = [];
+  for (var i = 0; i < count; i++) {
+    randomProducts.push(getOneRandomProduct());
+  }
+  return randomProducts;
+}
+
+function getOneRandomProduct() {
+  var newRandomProduct = {};
+  newRandomProduct.name = getRandomUniqueArrayElement(PRODUCT_NAMES);
+  newRandomProduct.picture = PRODUCTS_PICTURES_PATH
+    + getRandomArrayElement(PRODUCT_PICTURES);
+  newRandomProduct.amount = getRandomInRange(0, 20);
+  newRandomProduct.price = getRandomInRange(100, 1500);
+  newRandomProduct.weight = getRandomInRange(30, 300);
+  newRandomProduct.rating = {};
+  newRandomProduct.rating.value = getRandomInRange(1, 5);
+  newRandomProduct.rating.number = getRandomInRange(10, 900);
+  newRandomProduct.nutritionFacts = {};
+  newRandomProduct.nutritionFacts.sugar = getRandomBool();
+  newRandomProduct.nutritionFacts.energy = getRandomInRange(70, 500);
+  newRandomProduct.contents = generateComposition();
+
+  return newRandomProduct;
 }
 
 function generateComposition() {
@@ -123,34 +445,97 @@ function generateComposition() {
   return availableIngredients.join(', ');
 }
 
-function generateItemData() {
-  var product = {};
-  product.name = getRandomArrayElement(PRODUCT_NAMES);
-  product.picture = PRODUCTS_PICTURES_PATH
-    + getRandomArrayElement(PRODUCT_PICTURES);
-  product.amount = getRandomInRange(0, 20);
-  product.price = getRandomInRange(100, 1500);
-  product.weight = getRandomInRange(30, 300);
-  product.rating = {};
-  product.rating.value = getRandomInRange(1, 5);
-  product.rating.number = getRandomInRange(10, 900);
-  product.nutritionFacts = {};
-  product.nutritionFacts.sugar = getRandomBool();
-  product.nutritionFacts.energy = getRandomInRange(70, 500);
-  product.contents = generateComposition();
-
-  return product;
+function getRandomUniqueArrayElement(array) {
+  var min = 0;
+  var max = array.length - 1;
+  var randomIndex = getRandomInRange(min, max);
+  var element = array[randomIndex];
+  array.splice(randomIndex, 1);
+  return element;
 }
 
-function getProductsData(count) {
-  var productsData = [];
-  for (var i = 0; i < count; i++) {
-    productsData.push(generateItemData());
+function getRandomArrayElement(array) {
+  var min = 0;
+  var max = array.length - 1;
+  var randomIndex = getRandomInRange(min, max);
+  return array[randomIndex];
+}
+
+function getRandomInRange(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomBool() {
+  return Boolean(getRandomInRange(0, 1));
+}
+
+function getFragmentWithCards(data, makeCard) {
+  var fragment = document.createDocumentFragment();
+
+  for (var i = 0; i < data.length; i++) {
+    fragment.appendChild(makeCard(data[i], i));
   }
-  return productsData;
+
+  return fragment;
 }
 
-function getEndingForWordAfterNumber(number) {
+function makeCatalogCard(product) {
+  var newCatalogCard = catalogCardTemplate.cloneNode(true);
+
+  setAmountClass(newCatalogCard, product.amount);
+
+  newCatalogCard.querySelector('.card__title').textContent = product.name;
+  var cardImage = newCatalogCard.querySelector('.card__img');
+  cardImage.src = product.picture;
+  cardImage.alt = product.name;
+
+  var cardPrice = newCatalogCard.querySelector('.card__price');
+  cardPrice.firstChild.data = product.price + ' ';
+  cardPrice.querySelector('.card__weight').textContent =
+    '/ ' + product.weight + ' Г';
+
+  var ratingElement = newCatalogCard.querySelector('.stars__rating');
+
+  ratingElement.textContent =
+    'Рейтинг: ' + product.rating.value + ' звезд'
+    + getEndingForWordStar(product.rating.value);
+
+  ratingElement.classList.remove('stars__rating--five');// fix error in template
+  ratingElement.classList.add(getClassOnRating(product.rating.value));
+
+  newCatalogCard.querySelector('.star__count').textContent =
+    '(' + product.rating.number + ')';
+
+  newCatalogCard.querySelector('.card__characteristic').textContent =
+    getSugarStatusString(product.nutritionFacts.sugar)
+    + product.nutritionFacts.energy + ' ккал';
+
+  newCatalogCard.querySelector('.card__composition-list').textContent =
+    product.contents;
+
+  return newCatalogCard;
+}
+
+function setAmountClass(catalogCard, amount) {
+  switch (true) {
+    case amount >= 1 && amount <= 5:
+      catalogCard.classList.remove('card--soon');
+      catalogCard.classList.remove('card--in-stock');
+      catalogCard.classList.add('card--little');
+      break;
+    case amount > 5:
+      catalogCard.classList.remove('card--soon');
+      catalogCard.classList.remove('card--little');
+      catalogCard.classList.add('card--in-stock');
+      break;
+    default:
+      catalogCard.classList.remove('card--little');
+      catalogCard.classList.remove('card--in-stock');
+      catalogCard.classList.add('card--soon');
+  }
+}
+
+function getEndingForWordStar(number) {
   var ending = '';
   if (number === 1) {
     ending = 'а';
@@ -160,22 +545,10 @@ function getEndingForWordAfterNumber(number) {
   return ending;
 }
 
-function getClassOnQuantity(itemAmount) {
-  var className = 'card--soon';
-
-  if (itemAmount >= 1 && itemAmount <= 5) {
-    className = 'card--little';
-  } else if (itemAmount > 5) {
-    className = 'card--in-stock';
-  }
-
-  return className;
-}
-
-function getClassOnRating(itemRating) {
+function getClassOnRating(productRating) {
   var className = '';
 
-  switch (itemRating) {
+  switch (productRating) {
     case 1:
       className = 'stars__rating-one';
       break;
@@ -200,83 +573,21 @@ function getSugarStatusString(flag) {
   return flag ? 'Содержит сахар. ' : 'Без сахара. ';
 }
 
-function makeCatalogItem(itemData) {
-  var item = catalogItemTemplate.cloneNode(true);
+function makeBasketCard(product) {
+  var newBasketCard = basketCardTemplate.cloneNode(true);
+  var cardImage = newBasketCard.querySelector('.card-order__img');
+  var cardOrderCount = newBasketCard.querySelector('.card-order__count');
 
-  item.classList.remove('card--in-stock');// fix error in template
-  item.classList.add(getClassOnQuantity(itemData.amount));
+  newBasketCard.querySelector('.card-order__title').textContent = product.name;
+  cardImage.src = product.picture;
+  cardImage.alt = product.name;
+  newBasketCard.querySelector('.card-order__price').textContent =
+    product.price + ' ' + CURRENCY_SIGN;
+  cardOrderCount.value = product.orderedAmount;
+  cardOrderCount.type = 'number';
+  cardOrderCount.min = 0;
+  cardOrderCount.max = product.amount;
 
-  item.querySelector('.card__title').textContent = itemData.name;
-  var itemImage = item.querySelector('.card__img');
-  itemImage.src = itemData.picture;
-  itemImage.alt = itemData.name;
-
-  var cardPrice = item.querySelector('.card__price');
-  cardPrice.firstChild.data = itemData.price + ' ';
-  cardPrice.querySelector('.card__weight').textContent =
-    '/ ' + itemData.weight + ' Г';
-
-  var ratingElement = item.querySelector('.stars__rating');
-
-  ratingElement.textContent =
-    'Рейтинг: ' + itemData.rating.value + ' звезд'
-    + getEndingForWordAfterNumber(itemData.rating.value);
-
-  ratingElement.classList.remove('stars__rating--five');// fix error in template
-  ratingElement.classList.add(getClassOnRating(itemData.rating.value));
-
-  item.querySelector('.star__count').textContent =
-    '(' + itemData.rating.number + ')';
-
-  item.querySelector('.card__characteristic').textContent =
-    getSugarStatusString(itemData.nutritionFacts.sugar)
-    + itemData.nutritionFacts.energy + ' ккал';
-
-  item.querySelector('.card__composition-list').textContent =
-    itemData.contents;
-
-  return item;
+  return newBasketCard;
 }
 
-function makeBasketItem(itemData) {
-  var item = basketItemTemplate.cloneNode(true);
-
-  item.querySelector('.card-order__title').textContent = itemData.name;
-  var itemImage = item.querySelector('.card-order__img');
-  itemImage.src = itemData.picture;
-  itemImage.alt = itemData.name;
-  item.querySelector('.card-order__price').textContent =
-    itemData.price + ' ' + RUBLE_SIGN;
-
-  return item;
-}
-
-function makePackOfElements(data, getElement) {
-  var fragment = document.createDocumentFragment();
-
-  for (var i = 0; i < data.length; i++) {
-    fragment.appendChild(getElement(data[i]));
-  }
-
-  return fragment;
-}
-
-function renderCatalog() {
-  catalogCards.classList.remove('catalog__cards--load');
-  catalogLoad.classList.add('visually-hidden');
-  var catalogItemsData = getProductsData(CATALOG_ITEMS_COUNT);
-  var packOfCatalogItems =
-    makePackOfElements(catalogItemsData, makeCatalogItem);
-  catalogCards.appendChild(packOfCatalogItems);
-}
-
-function renderBasket() {
-  goodsCards.classList.remove('goods__cards--empty');
-  goodsCardEmpty.classList.add('visually-hidden');
-  var basketItemsData = getProductsData(BASKET_ITEMS_COUNT);
-  var packOfBasketItems = makePackOfElements(basketItemsData, makeBasketItem);
-  goodsCards.appendChild(packOfBasketItems);
-}
-
-renderCatalog();
-renderBasket();

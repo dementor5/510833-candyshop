@@ -176,22 +176,23 @@ function getRandomProductsInfo(count) {
 }
 
 function getOneRandomProductInfo() {
-  var newRandomProductInfo = {};
-  newRandomProductInfo.name = getRandomUniqueArrayElement(PRODUCT_NAMES);
-  newRandomProductInfo.picture = PRODUCTS_PICTURES_PATH
-    + getRandomArrayElement(PRODUCT_PICTURES);
-  newRandomProductInfo.amount = getRandomInRange(0, 20);
-  newRandomProductInfo.price = getRandomInRange(100, 1500);
-  newRandomProductInfo.weight = getRandomInRange(30, 300);
-  newRandomProductInfo.rating = {};
-  newRandomProductInfo.rating.value = getRandomInRange(1, 5);
-  newRandomProductInfo.rating.number = getRandomInRange(10, 900);
-  newRandomProductInfo.nutritionFacts = {};
-  newRandomProductInfo.nutritionFacts.sugar = getRandomBool();
-  newRandomProductInfo.nutritionFacts.energy = getRandomInRange(70, 500);
-  newRandomProductInfo.contents = generateComposition();
-
-  return newRandomProductInfo;
+  return {
+    name: getRandomUniqueArrayElement(PRODUCT_NAMES),
+    picture: PRODUCTS_PICTURES_PATH
+      + getRandomUniqueArrayElement(PRODUCT_PICTURES),
+    amount: getRandomInRange(0, 20),
+    price: getRandomInRange(100, 1500),
+    weight: getRandomInRange(30, 300),
+    rating: {
+      value: getRandomInRange(1, 5),
+      number: getRandomInRange(10, 900)
+    },
+    nutritionFacts: {
+      sugar: getRandomBool(),
+      energy: getRandomInRange(70, 500)
+    },
+    contents: generateComposition()
+  };
 }
 
 function generateComposition() {
@@ -215,13 +216,6 @@ function getRandomUniqueArrayElement(array) {
   return element;
 }
 
-function getRandomArrayElement(array) {
-  var min = 0;
-  var max = array.length - 1;
-  var randomIndex = getRandomInRange(min, max);
-  return array[randomIndex];
-}
-
 function getRandomInRange(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -242,44 +236,37 @@ function getFragmentWithCards(data, makeCard) {
 
 function createCatalogCardElement(product) {
   var newCatalogCard = catalogCardTemplateElement.cloneNode(true);
-
-  setAmountClass(newCatalogCard, product.amount);
-
-  newCatalogCard.querySelector('.card__title').textContent = product.name;
-  var cardImage = newCatalogCard.querySelector('.card__img');
-  cardImage.src = product.picture;
-  cardImage.alt = product.name;
-
-  var cardPrice = newCatalogCard.querySelector('.card__price');
-  cardPrice.firstChild.data = product.price + ' ';
-  cardPrice.querySelector('.card__weight').textContent =
-    '/ ' + product.weight + ' Г';
-
+  var cardTitleElement = newCatalogCard.querySelector('.card__title');
+  var cardImageElement = newCatalogCard.querySelector('.card__img');
+  var cardPriceElement = newCatalogCard.querySelector('.card__price');
+  var cardWeightElement = cardPriceElement.querySelector('.card__weight');
+  var starCountElement = newCatalogCard.querySelector('.star__count');
+  var characteristicElement =
+    newCatalogCard.querySelector('.card__characteristic');
+  var composition = newCatalogCard.querySelector('.card__composition-list');
   var ratingElement = newCatalogCard.querySelector('.stars__rating');
 
+  cardTitleElement.textContent = product.name;
+  cardImageElement.src = product.picture;
+  cardImageElement.alt = product.name;
+  cardPriceElement.firstChild.data = product.price + ' ';
+  cardWeightElement.textContent = '/ ' + product.weight + ' Г';
   ratingElement.textContent =
     'Рейтинг: ' + product.rating.value + ' звезд'
-    + getEndingForWordStar(product.rating.value);
-
-  ratingElement.classList.remove('stars__rating--five');// fix error in template
-  ratingElement.classList.add(getClassOnRating(product.rating.value));
-
-  newCatalogCard.querySelector('.star__count').textContent =
-    '(' + product.rating.number + ')';
-
-  newCatalogCard.querySelector('.card__characteristic').textContent =
+    + getStarEnding(product.rating.value);
+  starCountElement.textContent = '(' + product.rating.number + ')';
+  characteristicElement.textContent =
     getSugarStatusString(product.nutritionFacts.sugar)
     + product.nutritionFacts.energy + ' ккал';
-
-  newCatalogCard.querySelector('.card__composition-list').textContent =
-    product.contents;
-
+  composition.textContent = product.contents;
+  setAmountClass(newCatalogCard, product.amount);
+  setRatingClass(ratingElement, product.rating.value);
   addListenerOnCatalogCardElement(newCatalogCard);
 
   return newCatalogCard;
 }
 
-function getEndingForWordStar(number) {
+function getStarEnding(number) {
   var ending = null;
 
   if (number === 1) {
@@ -291,7 +278,7 @@ function getEndingForWordStar(number) {
   return ending;
 }
 
-function getClassOnRating(productRating) {
+function setRatingClass(element, productRating) {
   var className = null;
 
   switch (productRating) {
@@ -312,7 +299,10 @@ function getClassOnRating(productRating) {
       break;
   }
 
-  return className;
+  element.classList.remove('stars__rating--five');// fix error in template
+  if (className) {
+    element.classList.add(className);
+  }
 }
 
 function getSugarStatusString(flag) {
@@ -340,15 +330,12 @@ function toggleFavoriteButton(button) {
 }
 
 function addProductToBasket(catalogCardElement) {
-  var catalogCardTitle =
-    catalogCardElement.querySelector('.card__title').textContent;
-  var catalogProductInfo =
-    getProductInfoByName(catalogCardTitle, productsInCatalogInfo);
+  var title = catalogCardElement.querySelector('.card__title').textContent;
+  var catalogProductInfo = getProductInfo(title, productsInCatalogInfo);
 
   if (catalogProductInfo.amount) {
     var basketCardIsRendered = false;
-    var basketProductInfo =
-      getProductInfoByName(catalogProductInfo.name, productsInBasketInfo);
+    var basketProductInfo = getProductInfo(title, productsInBasketInfo);
 
     if (basketProductInfo) {
       basketCardIsRendered = true;
@@ -359,15 +346,12 @@ function addProductToBasket(catalogCardElement) {
 
     catalogProductInfo.amount--;
     basketProductInfo.orderedAmount++;
-    basketProductInfo.alreadyOrdered = basketProductInfo.orderedAmount;
 
-    setAmountClass(catalogCardElement, catalogProductInfo.amount);
-    setHeaderBasketElementText();
-
-    if (!basketCardIsRendered) {
-      renderBasketCardElement(basketProductInfo);
+    if (basketCardIsRendered) {
+      renderDOMChanges('pointChange', title);
     } else {
-      changeBasketCardElementOrderCountValue(basketProductInfo);
+      renderBasketCardElement(basketProductInfo);
+      renderDOMChanges('add', title);
     }
   }
 }
@@ -380,7 +364,6 @@ function createBasketProductInfo(catalogProductInfo) {
   delete basketProductInfo.rating;
   delete basketProductInfo.weight;
   basketProductInfo.orderedAmount = 0;
-  basketProductInfo.alreadyOrdered = basketProductInfo.orderedAmount;
 
   return basketProductInfo;
 }
@@ -388,25 +371,21 @@ function createBasketProductInfo(catalogProductInfo) {
 function renderBasketCardElement(basketProductInfo) {
   var newBasketCardElement = createBasketCardElement(basketProductInfo);
 
-  if (productsInBasketInfo.length === 1) {
-    hideBasketEmptyMessage();
-  }
-
   basketElement.appendChild(newBasketCardElement);
   basketCardsElements = basketElement.querySelectorAll('.goods_card');
 }
 
 function createBasketCardElement(basketProductInfo) {
   var newBasketCard = basketCardTemplateElement.cloneNode(true);
+  var cardTitle = newBasketCard.querySelector('.card-order__title');
   var cardImage = newBasketCard.querySelector('.card-order__img');
+  var cardPrice = newBasketCard.querySelector('.card-order__price');
   var cardOrderCount = newBasketCard.querySelector('.card-order__count');
 
-  newBasketCard.querySelector('.card-order__title').textContent =
-    basketProductInfo.name;
+  cardTitle.textContent = basketProductInfo.name;
   cardImage.src = basketProductInfo.picture;
   cardImage.alt = basketProductInfo.name;
-  newBasketCard.querySelector('.card-order__price').textContent =
-    basketProductInfo.price + ' ' + CURRENCY_SIGN;
+  cardPrice.textContent = basketProductInfo.price + ' ' + CURRENCY_SIGN;
   cardOrderCount.value = basketProductInfo.orderedAmount;
   cardOrderCount.min = 0;
   cardOrderCount.max = basketProductInfo.amount;
@@ -418,12 +397,12 @@ function createBasketCardElement(basketProductInfo) {
 function addListenersOnBasketCard(baskedCardElement) {
   baskedCardElement.addEventListener('click', function (evt) {
 
-    if (evt.target.classList.contains('card-order__btn--decrease')) {
-      reduceBasketProductInfoOrderedAmount(evt.currentTarget);
-    }
-
     if (evt.target.classList.contains('card-order__btn--increase')) {
       increaseBasketProductInfoOrderedAmount(evt.currentTarget);
+    }
+
+    if (evt.target.classList.contains('card-order__btn--decrease')) {
+      reduceBasketProductInfoOrderedAmount(evt.currentTarget);
     }
 
     if (evt.target.classList.contains('card-order__close')) {
@@ -440,78 +419,39 @@ function addListenersOnBasketCard(baskedCardElement) {
   });
 }
 
-function reduceBasketProductInfoOrderedAmount(basketCardElement) {
-  var basketCardElementTitle =
-    basketCardElement.querySelector('.card-order__title').textContent;
-  var basketProductInfo =
-    getProductInfoByName(basketCardElementTitle, productsInBasketInfo);
-  var catalogProductInfo =
-    getProductInfoByName(basketCardElementTitle, productsInCatalogInfo);
-  var catalogCardElement =
-    getcatalogProductElementByName(basketCardElementTitle);
-
-  if (basketProductInfo.orderedAmount > 1) {
-    basketProductInfo.orderedAmount--;
-    basketProductInfo.alreadyOrdered = basketProductInfo.orderedAmount;
-    catalogProductInfo.amount++;
-    changeBasketCardElementOrderCountValue(basketProductInfo);
-  } else {
-    deleteBasketProductInfo(basketCardElementTitle);
-    deleteBasketProductElementByName(basketCardElementTitle);
-  }
-
-  setAmountClass(catalogCardElement, catalogProductInfo.amount);
-  setHeaderBasketElementText();
-}
-
 function increaseBasketProductInfoOrderedAmount(basketCardElement) {
-  var basketCardElementTitle =
-    basketCardElement.querySelector('.card-order__title').textContent;
-  var catalogProductInfo =
-    getProductInfoByName(basketCardElementTitle, productsInCatalogInfo);
-  var basketProductInfo =
-    getProductInfoByName(basketCardElementTitle, productsInBasketInfo);
-  var catalogCardElement =
-    getcatalogProductElementByName(basketCardElementTitle);
+  var title = basketCardElement.querySelector('.card-order__title').textContent;
+  var catalogProductInfo = getProductInfo(title, productsInCatalogInfo);
+  var basketProductInfo = getProductInfo(title, productsInBasketInfo);
 
   if (catalogProductInfo.amount > 0) {
     catalogProductInfo.amount--;
     basketProductInfo.orderedAmount++;
-    basketProductInfo.alreadyOrdered = basketProductInfo.orderedAmount;
-    changeBasketCardElementOrderCountValue(basketProductInfo);
-
-    setAmountClass(catalogCardElement, catalogProductInfo.amount);
-    setHeaderBasketElementText();
+    renderDOMChanges('pointChange', title);
   }
 }
 
-function deleteBasketProduct(basketCardElement) {
-  var basketCardElementTitle =
-    basketCardElement.querySelector('.card-order__title').textContent;
-  var catalogProductInfo =
-    getProductInfoByName(basketCardElementTitle, productsInCatalogInfo);
-  var catalogCardElement =
-    getcatalogProductElementByName(basketCardElementTitle);
+function reduceBasketProductInfoOrderedAmount(basketCardElement) {
+  var title = basketCardElement.querySelector('.card-order__title').textContent;
+  var basketProductInfo = getProductInfo(title, productsInBasketInfo);
+  var catalogProductInfo = getProductInfo(title, productsInCatalogInfo);
 
-  deleteBasketProductInfo(basketCardElementTitle);
-  deleteBasketProductElementByName(basketCardElementTitle);
-
-  setAmountClass(catalogCardElement, catalogProductInfo.amount);
-  setHeaderBasketElementText();
-
+  if (basketProductInfo.orderedAmount > 1) {
+    basketProductInfo.orderedAmount--;
+    catalogProductInfo.amount++;
+    renderDOMChanges('pointChange', title);
+  } else {
+    deleteBasketProduct(basketCardElement);
+  }
 }
 
 function changeBasketProductInfoOrderAmount(basketCardElement, cardOrderCount) {
-  var basketCardElementTitle =
-    basketCardElement.querySelector('.card-order__title').textContent;
-  var catalogProductInfo =
-    getProductInfoByName(basketCardElementTitle, productsInCatalogInfo);
-  var basketProductInfo =
-    getProductInfoByName(basketCardElementTitle, productsInBasketInfo);
+  var title = basketCardElement.querySelector('.card-order__title').textContent;
+  var catalogProductInfo = getProductInfo(title, productsInCatalogInfo);
+  var basketProductInfo = getProductInfo(title, productsInBasketInfo);
   var sumAllAvailableProduct =
     catalogProductInfo.amount + basketProductInfo.orderedAmount;
-  var catalogCardElement =
-    getcatalogProductElementByName(basketCardElementTitle);
+  var difference = 0;
 
   if (cardOrderCount.value > sumAllAvailableProduct) {
     cardOrderCount.value = sumAllAvailableProduct;
@@ -519,38 +459,58 @@ function changeBasketProductInfoOrderAmount(basketCardElement, cardOrderCount) {
     cardOrderCount.value = 0;
   }
 
-  var difference = cardOrderCount.value - basketProductInfo.alreadyOrdered;
+  difference = cardOrderCount.value - basketProductInfo.orderedAmount;
   catalogProductInfo.amount -= difference;
   basketProductInfo.orderedAmount += difference;
-  basketProductInfo.alreadyOrdered = basketProductInfo.orderedAmount;
 
   if (cardOrderCount.value === '0') {
-    deleteBasketProductInfo(basketCardElementTitle);
-    deleteBasketProductElementByName(basketCardElementTitle);
+    deleteBasketProduct(basketCardElement);
+  } else {
+    renderDOMChanges('inputChange', title);
   }
-
-  setAmountClass(catalogCardElement, catalogProductInfo.amount);
-  setHeaderBasketElementText();
 }
 
-function deleteBasketProductInfo(cardTitle) {
-  var catalogProductInfo = getProductInfoByName(cardTitle, productsInCatalogInfo);
-  var basketProductInfo = getProductInfoByName(cardTitle, productsInBasketInfo);
-  var basketProductIndex =
-    getProductInfoIndexByName(cardTitle, productsInBasketInfo);
+function deleteBasketProduct(basketCardElement) {
+  var title = basketCardElement.querySelector('.card-order__title').textContent;
+  var catalogProductInfo = getProductInfo(title, productsInCatalogInfo);
+  var basketProductInfo = getProductInfo(title, productsInBasketInfo);
+  var basketProductIndex = getProductInfoIndex(title, productsInBasketInfo);
 
   catalogProductInfo.amount += basketProductInfo.orderedAmount;
   productsInBasketInfo.splice(basketProductIndex, 1);
+  basketCardElement.remove();
+  renderDOMChanges('delete', title);
 }
 
-function deleteBasketProductElementByName(name) {
-  getBasketCardByName(name).remove();
-  if (!productsInBasketInfo.length) {
-    showBasketEmptyMessage();
+function renderDOMChanges(flag, name) {
+  var catalogCardElement = getCatalogCardElement(name);
+  var catalogProductInfo = getProductInfo(name, productsInCatalogInfo);
+  var basketProductInfo = getProductInfo(name, productsInBasketInfo);
+
+  switch (flag) {
+    case 'add':
+      setAmountClass(catalogCardElement, catalogProductInfo.amount);
+      setBasketEmptyMessage(productsInBasketInfo.length);
+      break;
+
+    case 'inputChange':
+      setAmountClass(catalogCardElement, catalogProductInfo.amount);
+      break;
+
+    case 'pointChange':
+      setAmountClass(catalogCardElement, catalogProductInfo.amount);
+      setBasketCardElemntOrderCount(basketProductInfo);
+      break;
+
+    case 'delete':
+      setAmountClass(catalogCardElement, catalogProductInfo.amount);
+      setBasketEmptyMessage(productsInBasketInfo.length);
+      break;
   }
+  setHeaderBasketElementText();
 }
 
-function getProductInfoByName(name, productsInfo) {
+function getProductInfo(name, productsInfo) {
   for (var i = 0; i < productsInfo.length; i++) {
     if (productsInfo[i].name === name) {
       return productsInfo[i];
@@ -559,7 +519,7 @@ function getProductInfoByName(name, productsInfo) {
   return null;
 }
 
-function getProductInfoIndexByName(name, products) {
+function getProductInfoIndex(name, products) {
   for (var i = 0; i < products.length; i++) {
     if (products[i].name === name) {
       return i;
@@ -568,37 +528,36 @@ function getProductInfoIndexByName(name, products) {
   return null;
 }
 
-function getcatalogProductElementByName(name) {
+function getCatalogCardElement(name) {
   for (var i = 0; i < catalogCardsElements.length; i++) {
     if (catalogCardsElements[i].querySelector('.card__title')
-                                        .textContent === name) {
+                                       .textContent === name) {
       return catalogCardsElements[i];
     }
   }
   return null;
 }
 
-function hideBasketEmptyMessage() {
-  goodsCardEmptyElement.classList.add('visually-hidden');
-  basketElement.classList.remove('goods__cards--empty');
+function setBasketEmptyMessage(productsCount) {
+  if (productsCount === 1) {
+    goodsCardEmptyElement.classList.add('visually-hidden');
+    basketElement.classList.remove('goods__cards--empty');
+  } else if (!productsCount) {
+    goodsCardEmptyElement.classList.remove('visually-hidden');
+    basketElement.classList.add('goods__cards--empty');
+  }
 }
 
-function showBasketEmptyMessage() {
-  goodsCardEmptyElement.classList.remove('visually-hidden');
-  basketElement.classList.add('goods__cards--empty');
-}
-
-function changeBasketCardElementOrderCountValue(basketProductInfo) {
-  var basketCardElement = getBasketCardByName(basketProductInfo.name);
-  basketCardElement
-    .querySelector('.card-order__count')
+function setBasketCardElemntOrderCount(basketProductInfo) {
+  var basketCardElement = getBasketCardElement(basketProductInfo.name);
+  basketCardElement.querySelector('.card-order__count')
     .value = basketProductInfo.orderedAmount;
 }
 
-function getBasketCardByName(name) {
+function getBasketCardElement(name) {
   for (var i = 0; i < basketCardsElements.length; i++) {
     if (basketCardsElements[i].querySelector('.card-order__title')
-                                        .textContent === name) {
+                                            .textContent === name) {
       return basketCardsElements[i];
     }
   }
@@ -635,13 +594,13 @@ function setHeaderBasketElementText() {
 
     }
     message = 'В корзине ' + productsCount
-      + ' товар' + getEndingForProductWord(productsCount)
+      + ' товар' + getProductEnding(productsCount)
       + ' на сумму ' + totalPrice + ' ' + CURRENCY_SIGN;
   }
   mainHeaderBasketElement.textContent = message;
 }
 
-function getEndingForProductWord(productCount) {
+function getProductEnding(productCount) {
   var ending = '';
 
   if (productCount > 1 && productCount < 5) {

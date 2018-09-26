@@ -8,6 +8,10 @@
   margin: 0;
 }
 
+.range__btn {
+  z-index: 100;
+}
+
 .range__btn--right {
   right: auto;
   left: 81%;

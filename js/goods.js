@@ -335,23 +335,15 @@ function addProductToBasket(catalogCardElement) {
 
   if (catalogProductInfo.amount) {
     var basketCardIsRendered = false;
-    var basketProductInfo = getProductInfo(title, productsInBasketInfo);
-
-    if (basketProductInfo) {
-      basketCardIsRendered = true;
-    } else {
-      basketProductInfo = createBasketProductInfo(catalogProductInfo);
-      productsInBasketInfo.push(basketProductInfo);
-    }
+    var basketProductInfo = getProductInfo(title, productsInBasketInfo)
+      || createBasketProductInfo(catalogProductInfo);
 
     catalogProductInfo.amount--;
     basketProductInfo.orderedAmount++;
 
-    if (basketCardIsRendered) {
-      renderDOMChanges(title, 'pointChange');
-    } else {
-      renderDOMChanges(title, 'add');
-    }
+    var action = basketProductInfo.isNew ? 'add' : 'pointChange';
+    delete basketProductInfo.isNew;
+    renderDOMChanges(title, action);
   }
 }
 
@@ -363,6 +355,8 @@ function createBasketProductInfo(catalogProductInfo) {
   delete basketProductInfo.rating;
   delete basketProductInfo.weight;
   basketProductInfo.orderedAmount = 0;
+  basketProductInfo.isNew = true;
+  productsInBasketInfo.push(basketProductInfo);
 
   return basketProductInfo;
 }
@@ -401,7 +395,7 @@ function addListenersOnBasketCard(baskedCardElement) {
     }
 
     if (evt.target.classList.contains('card-order__btn--decrease')) {
-      changeBasketProductInfoAmount(evt.currentTarget, 'decreace');
+      changeBasketProductInfoAmount(evt.currentTarget, 'decrease');
     }
 
     if (evt.target.classList.contains('card-order__close')) {
@@ -425,49 +419,45 @@ function setBasketProductInfoAmount(basketCardElement, cardOrderCount) {
   var sumAllAvailableProduct =
     catalogProductInfo.amount + basketProductInfo.orderedAmount;
 
-  if (cardOrderCount.value > sumAllAvailableProduct) {
-    cardOrderCount.value = sumAllAvailableProduct;
-  } else if (cardOrderCount.value < 0) {
-    cardOrderCount.value = 0;
-  }
+  cardOrderCount.value =
+    normalizeOrderCountValue(cardOrderCount.value, sumAllAvailableProduct);
 
   if (cardOrderCount.value === '0') {
     deleteBasketProduct(basketCardElement);
   } else {
     var difference = cardOrderCount.value - basketProductInfo.orderedAmount;
-    changeBasketProductInfoAmount(basketCardElement, difference);
+    changeBasketProductInfoAmount(basketCardElement, 'change', difference);
   }
 }
 
-function changeBasketProductInfoAmount(basketCardElement, value) {
+function normalizeOrderCountValue(value, maxValue) {
+  if (value > maxValue) {
+    value = maxValue;
+  } else if (value < 0) {
+    value = 0;
+  }
+  return value;
+}
+
+function changeBasketProductInfoAmount(basketCardElement, action, value) {
   var title = basketCardElement.querySelector('.card-order__title').textContent;
   var basketProductInfo = getProductInfo(title, productsInBasketInfo);
   var catalogProductInfo = getProductInfo(title, productsInCatalogInfo);
 
-  switch (value) {
-    case 'increase':
-      if (catalogProductInfo.amount > 0) {
-        catalogProductInfo.amount--;
-        basketProductInfo.orderedAmount++;
-        renderDOMChanges(title, 'pointChange');
-      }
-      break;
-
-    case 'decreace':
-      if (basketProductInfo.orderedAmount > 1) {
-        basketProductInfo.orderedAmount--;
-        catalogProductInfo.amount++;
-        renderDOMChanges(title, 'pointChange');
-      } else {
-        deleteBasketProduct(basketCardElement);
-      }
-      break;
-
-    default:
-      catalogProductInfo.amount -= value;
-      basketProductInfo.orderedAmount += value;
-      renderDOMChanges(title);
-      break;
+  if (action === 'increase' && catalogProductInfo.amount > 0) {
+    catalogProductInfo.amount--;
+    basketProductInfo.orderedAmount++;
+    renderDOMChanges(title, 'pointChange');
+  } else if (action === 'decrease' && basketProductInfo.orderedAmount > 1) {
+    basketProductInfo.orderedAmount--;
+    catalogProductInfo.amount++;
+    renderDOMChanges(title, 'pointChange');
+  } else if (action === 'decrease' && basketProductInfo.orderedAmount <= 1) {
+    deleteBasketProduct(basketCardElement);
+  } else if (action === 'change' && Number.isInteger(value)) {
+    catalogProductInfo.amount -= value;
+    basketProductInfo.orderedAmount += value;
+    renderDOMChanges(title);
   }
 }
 

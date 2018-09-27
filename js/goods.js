@@ -348,10 +348,9 @@ function addProductToBasket(catalogCardElement) {
     basketProductInfo.orderedAmount++;
 
     if (basketCardIsRendered) {
-      renderDOMChanges('pointChange', title);
+      renderDOMChanges(title, 'pointChange');
     } else {
-      renderBasketCardElement(basketProductInfo);
-      renderDOMChanges('add', title);
+      renderDOMChanges(title, 'add');
     }
   }
 }
@@ -398,11 +397,11 @@ function addListenersOnBasketCard(baskedCardElement) {
   baskedCardElement.addEventListener('click', function (evt) {
 
     if (evt.target.classList.contains('card-order__btn--increase')) {
-      increaseBasketProductInfoOrderedAmount(evt.currentTarget);
+      changeBasketProductInfoAmount(evt.currentTarget, 'increase');
     }
 
     if (evt.target.classList.contains('card-order__btn--decrease')) {
-      reduceBasketProductInfoOrderedAmount(evt.currentTarget);
+      changeBasketProductInfoAmount(evt.currentTarget, 'decreace');
     }
 
     if (evt.target.classList.contains('card-order__close')) {
@@ -414,44 +413,17 @@ function addListenersOnBasketCard(baskedCardElement) {
 
   baskedCardElement.addEventListener('input', function (evt) {
     if (evt.target.classList.contains('card-order__count')) {
-      changeBasketProductInfoOrderAmount(evt.currentTarget, evt.target);
+      setBasketProductInfoAmount(evt.currentTarget, evt.target);
     }
   });
 }
 
-function increaseBasketProductInfoOrderedAmount(basketCardElement) {
-  var title = basketCardElement.querySelector('.card-order__title').textContent;
-  var catalogProductInfo = getProductInfo(title, productsInCatalogInfo);
-  var basketProductInfo = getProductInfo(title, productsInBasketInfo);
-
-  if (catalogProductInfo.amount > 0) {
-    catalogProductInfo.amount--;
-    basketProductInfo.orderedAmount++;
-    renderDOMChanges('pointChange', title);
-  }
-}
-
-function reduceBasketProductInfoOrderedAmount(basketCardElement) {
-  var title = basketCardElement.querySelector('.card-order__title').textContent;
-  var basketProductInfo = getProductInfo(title, productsInBasketInfo);
-  var catalogProductInfo = getProductInfo(title, productsInCatalogInfo);
-
-  if (basketProductInfo.orderedAmount > 1) {
-    basketProductInfo.orderedAmount--;
-    catalogProductInfo.amount++;
-    renderDOMChanges('pointChange', title);
-  } else {
-    deleteBasketProduct(basketCardElement);
-  }
-}
-
-function changeBasketProductInfoOrderAmount(basketCardElement, cardOrderCount) {
+function setBasketProductInfoAmount(basketCardElement, cardOrderCount) {
   var title = basketCardElement.querySelector('.card-order__title').textContent;
   var catalogProductInfo = getProductInfo(title, productsInCatalogInfo);
   var basketProductInfo = getProductInfo(title, productsInBasketInfo);
   var sumAllAvailableProduct =
     catalogProductInfo.amount + basketProductInfo.orderedAmount;
-  var difference = 0;
 
   if (cardOrderCount.value > sumAllAvailableProduct) {
     cardOrderCount.value = sumAllAvailableProduct;
@@ -459,14 +431,43 @@ function changeBasketProductInfoOrderAmount(basketCardElement, cardOrderCount) {
     cardOrderCount.value = 0;
   }
 
-  difference = cardOrderCount.value - basketProductInfo.orderedAmount;
-  catalogProductInfo.amount -= difference;
-  basketProductInfo.orderedAmount += difference;
-
   if (cardOrderCount.value === '0') {
     deleteBasketProduct(basketCardElement);
   } else {
-    renderDOMChanges('inputChange', title);
+    var difference = cardOrderCount.value - basketProductInfo.orderedAmount;
+    changeBasketProductInfoAmount(basketCardElement, difference);
+  }
+}
+
+function changeBasketProductInfoAmount(basketCardElement, value) {
+  var title = basketCardElement.querySelector('.card-order__title').textContent;
+  var basketProductInfo = getProductInfo(title, productsInBasketInfo);
+  var catalogProductInfo = getProductInfo(title, productsInCatalogInfo);
+
+  switch (value) {
+    case 'increase':
+      if (catalogProductInfo.amount > 0) {
+        catalogProductInfo.amount--;
+        basketProductInfo.orderedAmount++;
+        renderDOMChanges(title, 'pointChange');
+      }
+      break;
+
+    case 'decreace':
+      if (basketProductInfo.orderedAmount > 1) {
+        basketProductInfo.orderedAmount--;
+        catalogProductInfo.amount++;
+        renderDOMChanges(title, 'pointChange');
+      } else {
+        deleteBasketProduct(basketCardElement);
+      }
+      break;
+
+    default:
+      catalogProductInfo.amount -= value;
+      basketProductInfo.orderedAmount += value;
+      renderDOMChanges(title);
+      break;
   }
 }
 
@@ -478,36 +479,33 @@ function deleteBasketProduct(basketCardElement) {
 
   catalogProductInfo.amount += basketProductInfo.orderedAmount;
   productsInBasketInfo.splice(basketProductIndex, 1);
-  basketCardElement.remove();
-  renderDOMChanges('delete', title);
+  renderDOMChanges(title, 'delete');
 }
 
-function renderDOMChanges(flag, name) {
+function renderDOMChanges(name, flag) {
   var catalogCardElement = getCatalogCardElement(name);
+  var basketCardElement = getBasketCardElement(name);
   var catalogProductInfo = getProductInfo(name, productsInCatalogInfo);
   var basketProductInfo = getProductInfo(name, productsInBasketInfo);
 
+  setAmountClass(catalogCardElement, catalogProductInfo.amount);
+  setHeaderBasketElementText();
+
   switch (flag) {
     case 'add':
-      setAmountClass(catalogCardElement, catalogProductInfo.amount);
       setBasketEmptyMessage(productsInBasketInfo.length);
-      break;
-
-    case 'inputChange':
-      setAmountClass(catalogCardElement, catalogProductInfo.amount);
+      renderBasketCardElement(basketProductInfo);
       break;
 
     case 'pointChange':
-      setAmountClass(catalogCardElement, catalogProductInfo.amount);
-      setBasketCardElemntOrderCount(basketProductInfo);
+      setBasketCardElementAmount(basketProductInfo);
       break;
 
     case 'delete':
-      setAmountClass(catalogCardElement, catalogProductInfo.amount);
+      basketCardElement.remove();
       setBasketEmptyMessage(productsInBasketInfo.length);
       break;
   }
-  setHeaderBasketElementText();
 }
 
 function getProductInfo(name, productsInfo) {
@@ -548,7 +546,7 @@ function setBasketEmptyMessage(productsCount) {
   }
 }
 
-function setBasketCardElemntOrderCount(basketProductInfo) {
+function setBasketCardElementAmount(basketProductInfo) {
   var basketCardElement = getBasketCardElement(basketProductInfo.name);
   basketCardElement.querySelector('.card-order__count')
     .value = basketProductInfo.orderedAmount;

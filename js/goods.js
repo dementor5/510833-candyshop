@@ -80,74 +80,79 @@ var PRODUCT_INGREDIENTS = [
   'виллабаджо'
 ];
 var PRODUCTS_PICTURES_PATH = 'img/cards/';
+var STORE_MAPS_PATH = 'img/map/';
 var CATALOG_CARDS_COUNT = 26;
 var CURRENCY_SIGN = '₽';
+var CARD_CODE_LENGTH = 16;
+var CVC_LENGTH = 3;
 
-var catalogCardTemplateElement = document.querySelector('#card')
-    .content.querySelector('.catalog__card');
-var basketCardTemplateElement = document.querySelector('#card-order')
-    .content.querySelector('.goods_card');
-var catalogElement = document.querySelector('.catalog__cards');
-var catalogLoadElement = catalogElement.querySelector('.catalog__load');
-var orderFormElement = document.querySelector('.order_form');
-var basketElement = orderFormElement.querySelector('.goods__cards');
-var goodsCardEmptyElement = basketElement.querySelector('.goods__card-empty');
+var UP_KEYCODE = 38;
+var DOWN_KEYCODE = 40;
+
 var mainHeaderBasketElement = document.querySelector('.main-header__basket');
-var paymentCardElement = orderFormElement.querySelector('.payment__card-wrap');
-var paymentCashElement = orderFormElement.querySelector('.payment__cash-wrap');
-var deliverStoreElement = orderFormElement.querySelector('.deliver__store');
-var deliverCourierElement = orderFormElement.querySelector('.deliver__courier');
+
 var rangeElement = document.querySelector('.range');
 var rangeButtonsElements = rangeElement.querySelectorAll('.range__btn');
 var rangePriceMinElement = rangeElement.querySelector('.range__price--min');
 var rangePriceMaxElement = rangeElement.querySelector('.range__price--max');
 
-var productsInCatalogInfo = getRandomProductsInfo(CATALOG_CARDS_COUNT);
+var catalogElement = document.querySelector('.catalog__cards');
+var catalogLoadElement = catalogElement.querySelector('.catalog__load');
+
+var orderFormElement = document.querySelector('.order_form');
+
+var basketElement = orderFormElement.querySelector('.goods__cards');
+var goodsCardEmptyElement = basketElement.querySelector('.goods__card-empty');
+
+var orderElement = orderFormElement.querySelector('.order');
+
+var contactFieldElements =
+  orderElement.querySelectorAll('.contact-data__inputs input');
+
+var paymentTabSwitchElements =
+  orderElement.querySelectorAll('.payment__method input');
+var paymentCardSwitchElement = orderElement.querySelector('#payment__card');
+
+var paymentCardElement = orderElement.querySelector('.payment__card-wrap');
+var paymentFieldElements = paymentCardElement.querySelectorAll('input');
+var cardStatusElement =
+  paymentCardElement.querySelector('.payment__card-status');
+var paymentCashElement = orderElement.querySelector('.payment__cash-wrap');
+
+var deliveryTabSwitchElements =
+  orderElement.querySelectorAll('.deliver__toggle input');
+var deliveryStoreSwitchElement = orderElement.querySelector('#deliver__store');
+var deliveryStoreElement = orderElement.querySelector('.deliver__store');
+var deliveryStoresElement = deliveryStoreElement.querySelector('.deliver__stores');
+var deliveryStoresMapElement =
+  deliveryStoreElement.querySelector('.deliver__store-map-img');
+
+var deliveryCourierElement = orderElement.querySelector('.deliver__courier');
+var deliveryRequestElement =
+  deliveryCourierElement.querySelector('.deliver__entry-fields-wrap');
+
+var orderSubmitElement = orderFormElement.querySelector('.buy__submit-btn');
+
+var catalogCardTemplateElement = document.querySelector('#card')
+    .content.querySelector('.catalog__card');
+var basketCardTemplateElement = document.querySelector('#card-order')
+    .content.querySelector('.goods_card');
+
+var date = new Date();
+var month = date.getMonth();
+var year = date.getFullYear() - 2000;
+
+var productsInCatalogInfo = [];
 var productsInBasketInfo = [];
 var catalogCardsElements = [];
 var basketCardsElements = [];
 
-renderCatalog();
-addListenerOnOrderFormElement();
 addListenersOnSlider();
+addListenerOnOrderElement();
+renderCatalog();
+disableOrderFieldsInHidedTab();
+setOrderFieldsState();
 
-function renderCatalog() {
-  catalogElement.classList.remove('catalog__cards--load');
-  catalogLoadElement.classList.add('visually-hidden');
-  var fragmentWithCatalogCards =
-    getFragmentWithCards(productsInCatalogInfo, createCatalogCardElement);
-  catalogElement.appendChild(fragmentWithCatalogCards);
-  catalogCardsElements = catalogElement.querySelectorAll('.catalog__card');
-}
-
-function addListenerOnOrderFormElement() {
-  orderFormElement.addEventListener('change', function (evt) {
-    if (evt.target.classList.contains('toggle-btn__input')) {
-      switchTabsInOrderForm(evt.target.id);
-    }
-  });
-}
-
-function switchTabsInOrderForm(flag) {
-  switch (flag) {
-    case 'payment__card':
-      paymentCashElement.classList.add('visually-hidden');
-      paymentCardElement.classList.remove('visually-hidden');
-      break;
-    case 'payment__cash':
-      paymentCardElement.classList.add('visually-hidden');
-      paymentCashElement.classList.remove('visually-hidden');
-      break;
-    case 'deliver__store':
-      deliverCourierElement.classList.add('visually-hidden');
-      deliverStoreElement.classList.remove('visually-hidden');
-      break;
-    case 'deliver__courier':
-      deliverStoreElement.classList.add('visually-hidden');
-      deliverCourierElement.classList.remove('visually-hidden');
-      break;
-  }
-}
 
 function addListenersOnSlider() {
   for (var i = 0; i < rangeButtonsElements.length; i++) {
@@ -165,6 +170,232 @@ function changeSliderButtonPosition(button) {
     button.style.left = '70%';
     rangePriceMaxElement.textContent = button.style.left.slice(0, -1);
   }
+}
+
+function addListenerOnOrderElement() {
+  orderElement.addEventListener('change', function (evt) {
+    if (evt.target.classList.contains('toggle-btn__input')) {
+      switchTabsInOrderElement(evt.target.id);
+    }
+
+    if (evt.target.id === 'payment__card-number') {
+      checkCardNumberField(evt.target);
+    }
+
+    if (evt.target.id === 'payment__card-date') {
+      checkCardDateField(evt.target);
+    }
+
+    if (evt.target.name === 'store') {
+      changeStoreMap(evt.target.value);
+    }
+
+    checkIfCardField(evt.target.id);
+  });
+
+  orderElement.addEventListener('input', function (evt) {
+    if (evt.target.id === 'payment__card-number') {
+      limitLengthOfinputElementValue(evt.target, CARD_CODE_LENGTH);
+    }
+
+    if (evt.target.id === 'payment__card-cvc') {
+      limitLengthOfinputElementValue(evt.target, CVC_LENGTH);
+    }
+
+    if (evt.target.id === 'payment__card-date') {
+      filterCardDateField(evt.target);
+    }
+
+    if (evt.target.id === 'payment__cardholder') {
+      filterCardHolderField(evt.target);
+    }
+  });
+
+  orderElement.addEventListener('keydown', function (evt) {
+    if (evt.target.id === 'payment__card-number'
+        || evt.target.id === 'payment__card-cvc') {
+      disableInputModificationsByArrows(evt);
+    }
+  });
+
+  orderElement.addEventListener('wheel', function (evt) {
+    if (evt.target.id === 'payment__card-number'
+        || evt.target.id === 'payment__card-cvc') {
+      disableInputModificationsByMouseWeel(evt);
+    }
+  });
+}
+
+function checkIfCardField(id) {
+  for (var i = 0; i < paymentFieldElements.length; i++) {
+    if (paymentFieldElements[i].id === id) {
+      checkCardFields();
+    }
+  }
+}
+
+function changeStoreMap(mapName) {
+  var mapPath = STORE_MAPS_PATH + mapName + '.jpg';
+  deliveryStoresMapElement.src = mapPath;
+}
+
+function switchTabsInOrderElement(flag) {
+  switch (flag) {
+    case 'payment__card':
+      paymentCashElement.classList.add('visually-hidden');
+      paymentCardElement.classList.remove('visually-hidden');
+      setElementsDisabledState(paymentFieldElements, false);
+      break;
+    case 'payment__cash':
+      paymentCardElement.classList.add('visually-hidden');
+      paymentCashElement.classList.remove('visually-hidden');
+      setElementsDisabledState(paymentFieldElements, true);
+      break;
+    case 'deliver__store':
+      deliveryCourierElement.classList.add('visually-hidden');
+      deliveryStoreElement.classList.remove('visually-hidden');
+      deliveryRequestElement.disabled = true;
+      deliveryStoresElement.disabled = false;
+      break;
+    case 'deliver__courier':
+      deliveryStoreElement.classList.add('visually-hidden');
+      deliveryCourierElement.classList.remove('visually-hidden');
+      deliveryStoresElement.disabled = true;
+      deliveryRequestElement.disabled = false;
+      break;
+  }
+}
+
+function checkCardNumberField(cardNumberElement) {
+  if (getLuhnCheckResult(cardNumberElement.value)) {
+    cardNumberElement.setCustomValidity('');
+  } else {
+    cardNumberElement.setCustomValidity('Номер карты указан не верно');
+  }
+}
+
+function getLuhnCheckResult(cardNumber) {
+  if (!cardNumber) {
+    return null;
+  }
+  var result = cardNumber.split('').map(function (char, index) {
+    var integer = parseInt(char, 10);
+    if ((index + 1) % 2 !== 0) {
+      integer *= 2;
+      if (integer > 9) {
+        integer -= 9;
+      }
+    }
+    return integer;
+  }).reduce(function (sum, current) {
+    return sum + current;
+  });
+
+  return result % 10 === 0 ? true : false;
+}
+
+function checkCardDateField(element) {
+  if (element.value.length === element.minLength) {
+    var values = element.value.split('/');
+    var cardMonth = parseInt(values[0], 10);
+    var cardYear = parseInt(values[1], 10);
+    if (cardYear < year || cardYear === year && cardMonth < month) {
+      element.setCustomValidity('Срок действия карты истёк');
+    } else {
+      element.setCustomValidity('');
+    }
+  }
+}
+
+function checkCardFields() {
+  for (var i = 0; i < paymentFieldElements.length; i++) {
+    if (!paymentFieldElements[i].validity.valid) {
+      return false;
+    }
+  }
+
+  cardStatusElement.textContent = 'Одобрен';
+  return true;
+}
+
+function limitLengthOfinputElementValue(element, maxLength) {
+  if (element.value.length > maxLength) {
+    element.value = element.value.substring(0, maxLength);
+  }
+}
+
+function filterCardDateField(cardDateElement) {
+  cardDateElement.value = cardDateElement.value
+    .replace(/[^\d\/]/, '') // remove all except digits and /
+    .replace(/^\//, '') // remove first /
+    .replace(/^(\d{2})\d$/, '$1') // remove third digit
+    .replace(/\/{2}/, '/') // remove double slashes
+    .replace(/(\/\d)\/$/, '$1') // remove last slash
+    .replace(/^(0+|0+\/)$/, '0') // only one first 0
+    .replace(/^1\/$/, '01/') // 1 -> 01/
+    .replace(/^([2-9])$/, '0$1/') // 2->02/ to 09->09/
+    .replace(/^1([3-9])/, '01/$1'); // from 13-> 01/3 to 19 -> 01/9
+}
+
+function filterCardHolderField(element) {
+  element.value = element.value
+    .replace(/[^A-Za-z\s]+/, '')
+    .replace(/^([A-Za-z]+\s[A-Za-z]+)\s/, '$1')
+    .toUpperCase();
+}
+
+function disableInputModificationsByArrows(evt) {
+  if (evt.keyCode === UP_KEYCODE || evt.keyCode === DOWN_KEYCODE) {
+    evt.preventDefault();
+  }
+}
+
+function disableInputModificationsByMouseWeel(evt) {
+  evt.preventDefault();
+  var scrollTo = document.documentElement.scrollTop - evt.wheelDelta;
+  document.documentElement.scrollTop = scrollTo;
+}
+
+function disableOrderFieldsInHidedTab() {
+  deliveryRequestElement.disabled = true;
+}
+
+function setOrderFieldsState() {
+  var flag = productsInBasketInfo.length ? false : true;
+
+  setElementsDisabledState(contactFieldElements, flag);
+
+  setElementsDisabledState(paymentTabSwitchElements, flag);
+
+  if (paymentCardSwitchElement.checked) {
+    setElementsDisabledState(paymentFieldElements, flag);
+  }
+
+  setElementsDisabledState(deliveryTabSwitchElements, flag);
+
+  if (deliveryStoreSwitchElement.checked) {
+    deliveryStoresElement.disabled = flag;
+  } else {
+    deliveryRequestElement.disabled = flag;
+  }
+
+  orderSubmitElement.disabled = flag;
+}
+
+function setElementsDisabledState(elements, flag) {
+  elements.forEach(function (item) {
+    item.disabled = flag;
+  });
+}
+
+function renderCatalog() {
+  productsInCatalogInfo = getRandomProductsInfo(CATALOG_CARDS_COUNT);
+  var fragmentWithCatalogCards =
+    getFragmentWithCards(productsInCatalogInfo, createCatalogCardElement);
+  catalogElement.classList.remove('catalog__cards--load');
+  catalogLoadElement.classList.add('visually-hidden');
+  catalogElement.appendChild(fragmentWithCatalogCards);
+  catalogCardsElements = catalogElement.querySelectorAll('.catalog__card');
 }
 
 function getRandomProductsInfo(count) {
@@ -334,7 +565,6 @@ function addProductToBasket(catalogCardElement) {
   var catalogProductInfo = getProductInfo(title, productsInCatalogInfo);
 
   if (catalogProductInfo.amount) {
-    var basketCardIsRendered = false;
     var basketProductInfo = getProductInfo(title, productsInBasketInfo)
       || createBasketProductInfo(catalogProductInfo);
 
@@ -485,6 +715,7 @@ function renderDOMChanges(name, flag) {
     case 'add':
       setBasketEmptyMessage(productsInBasketInfo.length);
       renderBasketCardElement(basketProductInfo);
+      setOrderFieldsState();
       break;
 
     case 'pointChange':
@@ -494,6 +725,7 @@ function renderDOMChanges(name, flag) {
     case 'delete':
       basketCardElement.remove();
       setBasketEmptyMessage(productsInBasketInfo.length);
+      setOrderFieldsState();
       break;
   }
 }

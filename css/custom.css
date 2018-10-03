@@ -1,13 +1,3 @@
-.card-order__count {
-  -moz-appearance:textfield;
-}
-
-.card-order__count::-webkit-outer-spin-button,
-.card-order__count::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
 .range__btn {
   z-index: 100;
 }
@@ -15,4 +5,21 @@
 .range__btn--right {
   right: auto;
   left: 81%;
+}
+
+.card-order__count,
+#payment__card-number,
+#payment__card-cvc {
+  -moz-appearance:textfield;
+}
+
+.card-order__count::-webkit-outer-spin-button,
+.card-order__count::-webkit-inner-spin-button,
+#payment__card-number::-webkit-outer-spin-button,
+#payment__card-number::-webkit-inner-spin-button,
+#payment__card-cvc::-webkit-outer-spin-button,
+#payment__card-cvc::-webkit-inner-spin-button {
+
+  -webkit-appearance: none;
+  margin: 0;
 }

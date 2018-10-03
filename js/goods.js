@@ -174,40 +174,48 @@ function changeSliderButtonPosition(button) {
 
 function addListenerOnOrderElement() {
   orderElement.addEventListener('change', function (evt) {
+
     if (evt.target.classList.contains('toggle-btn__input')) {
       switchTabsInOrderElement(evt.target.id);
     }
 
-    if (evt.target.id === 'payment__card-number') {
-      checkCardNumberField(evt.target);
+    switch (evt.target.id) {
+      case 'payment__card-number':
+        checkCardNumberField(evt.target);
+        break;
+
+      case 'payment__card-date':
+        checkCardDateField(evt.target);
+        break;
     }
 
-    if (evt.target.id === 'payment__card-date') {
-      checkCardDateField(evt.target);
+    if (checkOnCardField(evt.target.id) && checkCardFieldsOnValid()) {
+      cardStatusElement.textContent = 'Одобрен';
     }
 
     if (evt.target.name === 'store') {
       changeStoreMap(evt.target.value);
     }
 
-    checkIfCardField(evt.target.id);
   });
 
   orderElement.addEventListener('input', function (evt) {
-    if (evt.target.id === 'payment__card-number') {
-      limitLengthOfinputElementValue(evt.target, CARD_CODE_LENGTH);
-    }
+    switch (evt.target.id) {
+      case 'payment__card-number':
+        limitLengthOfinputElementValue(evt.target, CARD_CODE_LENGTH);
+        break;
 
-    if (evt.target.id === 'payment__card-cvc') {
-      limitLengthOfinputElementValue(evt.target, CVC_LENGTH);
-    }
+      case 'payment__card-cvc':
+        limitLengthOfinputElementValue(evt.target, CVC_LENGTH);
+        break;
 
-    if (evt.target.id === 'payment__card-date') {
-      filterCardDateField(evt.target);
-    }
+      case 'payment__card-date':
+        filterCardDateField(evt.target);
+        break;
 
-    if (evt.target.id === 'payment__cardholder') {
-      filterCardHolderField(evt.target);
+      case 'payment__cardholder':
+        filterCardHolderField(evt.target);
+        break;
     }
   });
 
@@ -226,12 +234,24 @@ function addListenerOnOrderElement() {
   });
 }
 
-function checkIfCardField(id) {
+function checkOnCardField(id) {
   for (var i = 0; i < paymentFieldElements.length; i++) {
     if (paymentFieldElements[i].id === id) {
-      checkCardFields();
+      return true;
     }
   }
+
+  return false;
+}
+
+function checkCardFieldsOnValid() {
+  for (var i = 0; i < paymentFieldElements.length; i++) {
+    if (!paymentFieldElements[i].validity.valid) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function changeStoreMap(mapName) {
@@ -267,31 +287,42 @@ function switchTabsInOrderElement(flag) {
 }
 
 function checkCardNumberField(cardNumberElement) {
-  if (getLuhnCheckResult(cardNumberElement.value)) {
-    cardNumberElement.setCustomValidity('');
-  } else {
-    cardNumberElement.setCustomValidity('Номер карты указан не верно');
-  }
+  var validityMessage = getLuhnCheckResult(cardNumberElement.value)
+    ? ''
+    : 'Номер карты указан не верно';
+
+  cardNumberElement.setCustomValidity(validityMessage);
 }
 
 function getLuhnCheckResult(cardNumber) {
   if (!cardNumber) {
     return null;
   }
-  var result = cardNumber.split('').map(function (char, index) {
-    var integer = parseInt(char, 10);
-    if ((index + 1) % 2 !== 0) {
-      integer *= 2;
-      if (integer > 9) {
-        integer -= 9;
-      }
-    }
-    return integer;
-  }).reduce(function (sum, current) {
-    return sum + current;
-  });
 
-  return result % 10 === 0 ? true : false;
+  var result = cardNumber
+    .split('')
+    .map(function (char, index) {
+      var integer = parseInt(char, 10);
+      var ordinalNumber = index + 1;
+
+      if (isOdd(ordinalNumber)) {
+        integer *= 2;
+        if (integer > 9) {
+          integer -= 9;
+        }
+      }
+
+      return integer;
+    })
+    .reduce(function (sum, current) {
+      return sum + current;
+    });
+
+  return result % 10 === 0;
+}
+
+function isOdd(integer) {
+  return integer % 2 !== 0;
 }
 
 function checkCardDateField(element) {
@@ -299,23 +330,13 @@ function checkCardDateField(element) {
     var values = element.value.split('/');
     var cardMonth = parseInt(values[0], 10);
     var cardYear = parseInt(values[1], 10);
-    if (cardYear < year || cardYear === year && cardMonth < month) {
-      element.setCustomValidity('Срок действия карты истёк');
-    } else {
-      element.setCustomValidity('');
-    }
-  }
-}
+    var validityMessage =
+      cardYear < year || cardYear === year && cardMonth < month
+        ? 'Срок действия карты истёк'
+        : '';
 
-function checkCardFields() {
-  for (var i = 0; i < paymentFieldElements.length; i++) {
-    if (!paymentFieldElements[i].validity.valid) {
-      return false;
-    }
+    element.setCustomValidity(validityMessage);
   }
-
-  cardStatusElement.textContent = 'Одобрен';
-  return true;
 }
 
 function limitLengthOfinputElementValue(element, maxLength) {
@@ -373,12 +394,11 @@ function setOrderFieldsState() {
 
   setElementsDisabledState(deliveryTabSwitchElements, flag);
 
-  if (deliveryStoreSwitchElement.checked) {
-    deliveryStoresElement.disabled = flag;
-  } else {
-    deliveryRequestElement.disabled = flag;
-  }
+  var element = deliveryStoreSwitchElement.checked
+    ? deliveryStoresElement
+    : deliveryRequestElement;
 
+  element.disabled = flag;
   orderSubmitElement.disabled = flag;
 }
 

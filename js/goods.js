@@ -99,6 +99,16 @@ var rightHandleElement = rangeElement.querySelector('.range__btn--right');
 var rangePriceMinElement = rangeElement.querySelector('.range__price--min');
 var rangePriceMaxElement = rangeElement.querySelector('.range__price--max');
 
+var RANGE_WIDTH = rangeFilter.offsetWidth;
+var HANDLE_HALF_WIDTH = leftHandleElement.offsetWidth / 2;
+var MIN_RANGE_POSITION = -HANDLE_HALF_WIDTH;
+var MAX_RANGE_POSITION = RANGE_WIDTH - HANDLE_HALF_WIDTH;
+
+var leftHandleInfo;
+var rightHandleInfo;
+var handleInfo;
+var handlesPercentPosition = {};
+
 var catalogElement = document.querySelector('.catalog__cards');
 var catalogLoadElement = catalogElement.querySelector('.catalog__load');
 
@@ -150,34 +160,24 @@ var productsInBasketInfo = [];
 var catalogCardsElements = [];
 var basketCardsElements = [];
 
-addListenersOnRangeElement();
+initRangeElement();
 addListenerOnOrderElement();
 renderCatalog();
 disableOrderFieldsInHidedTab();
 setOrderFieldsState();
 
-var rangeWidth = rangeFilter.offsetWidth;
-var handleHalfWidth = leftHandleElement.offsetWidth / 2;
-var minRangePosition = -handleHalfWidth;
-var maxRangePosition = rangeWidth - handleHalfWidth;
+function initRangeElement() {
+  makeHandleInfoObjects();
+  addListenersOnRangeElement();
+}
 
-var leftHandleInfo;
-var rightHandleInfo;
-var handleInfo;
-
-var handlesPercentPosition = {
-  left: 0,
-  right: 0
-};
-
-rangeInit();
-function rangeInit() {
+function makeHandleInfoObjects() {
   leftHandleInfo = {
     name: 'left',
     otherHandleElement: rightHandleElement,
     rangePriceElement: rangePriceMinElement,
     position: getComputedStyle(leftHandleElement).left.slice(0, -2),
-    minPosition: minRangePosition,
+    minPosition: MIN_RANGE_POSITION,
   };
 
   rightHandleInfo = {
@@ -185,7 +185,7 @@ function rangeInit() {
     otherHandleElement: leftHandleElement,
     rangePriceElement: rangePriceMaxElement,
     position: getComputedStyle(rightHandleElement).left.slice(0, -2),
-    maxPosition: maxRangePosition
+    maxPosition: MAX_RANGE_POSITION
   };
 }
 
@@ -228,20 +228,20 @@ function onMouseMove(evt) {
   handleInfo.handleElement.style.left = newPosition + 'px';
   handleInfo.position = newPosition;
 
-  var newCenterCoordinate = newPosition + handleHalfWidth;
-  var centerCoordinateOnMaxRange = maxRangePosition + handleHalfWidth;
+  var newCenterHandleCoordinate = newPosition + HANDLE_HALF_WIDTH;
+  var centerHandleCoordinateOnMaxRange = MAX_RANGE_POSITION + HANDLE_HALF_WIDTH;
   var percentHandlePosition = Math.round(
-      newCenterCoordinate / centerCoordinateOnMaxRange * 100
+      newCenterHandleCoordinate / centerHandleCoordinateOnMaxRange * 100
   );
 
   handleInfo.rangePriceElement.textContent = percentHandlePosition;
 
   if (handleInfo.name === 'left') {
-    rangeLine.style.left = newCenterCoordinate + 'px';
+    rangeLine.style.left = newCenterHandleCoordinate + 'px';
     handlesPercentPosition.left = percentHandlePosition;
 
   } else if (handleInfo.name === 'right') {
-    rangeLine.style.right = (maxRangePosition - newPosition) + 'px';
+    rangeLine.style.right = (MAX_RANGE_POSITION - newPosition) + 'px';
     handlesPercentPosition.right = percentHandlePosition;
   }
 }

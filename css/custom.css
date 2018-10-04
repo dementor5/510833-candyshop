@@ -19,7 +19,6 @@
 #payment__card-number::-webkit-inner-spin-button,
 #payment__card-cvc::-webkit-outer-spin-button,
 #payment__card-cvc::-webkit-inner-spin-button {
-
   -webkit-appearance: none;
   margin: 0;
 }

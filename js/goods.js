@@ -92,7 +92,10 @@ var DOWN_KEYCODE = 40;
 var mainHeaderBasketElement = document.querySelector('.main-header__basket');
 
 var rangeElement = document.querySelector('.range');
-var rangeButtonsElements = rangeElement.querySelectorAll('.range__btn');
+var rangeFilter = rangeElement.querySelector('.range__filter');
+var rangeLine = rangeElement.querySelector('.range__fill-line');
+var leftHandleElement = rangeElement.querySelector('.range__btn--left');
+var rightHandleElement = rangeElement.querySelector('.range__btn--right');
 var rangePriceMinElement = rangeElement.querySelector('.range__price--min');
 var rangePriceMaxElement = rangeElement.querySelector('.range__price--max');
 
@@ -147,29 +150,105 @@ var productsInBasketInfo = [];
 var catalogCardsElements = [];
 var basketCardsElements = [];
 
-addListenersOnSlider();
+addListenersOnRangeElement();
 addListenerOnOrderElement();
 renderCatalog();
 disableOrderFieldsInHidedTab();
 setOrderFieldsState();
 
+var rangeWidth = rangeFilter.offsetWidth;
+var handleHalfWidth = leftHandleElement.offsetWidth / 2;
+var minRangePosition = -handleHalfWidth;
+var maxRangePosition = rangeWidth - handleHalfWidth;
 
-function addListenersOnSlider() {
-  for (var i = 0; i < rangeButtonsElements.length; i++) {
-    rangeButtonsElements[i].addEventListener('mouseup', function (evt) {
-      changeSliderButtonPosition(evt.target);
-    });
+var leftHandleInfo;
+var rightHandleInfo;
+var handleInfo;
+
+var handlesPercentPosition = {
+  left: 0,
+  right: 0
+};
+
+rangeInit();
+function rangeInit() {
+  leftHandleInfo = {
+    name: 'left',
+    otherHandleElement: rightHandleElement,
+    rangePriceElement: rangePriceMinElement,
+    position: getComputedStyle(leftHandleElement).left.slice(0, -2),
+    minPosition: minRangePosition,
+  };
+
+  rightHandleInfo = {
+    name: 'right',
+    otherHandleElement: leftHandleElement,
+    rangePriceElement: rangePriceMaxElement,
+    position: getComputedStyle(rightHandleElement).left.slice(0, -2),
+    maxPosition: maxRangePosition
+  };
+}
+
+function addListenersOnRangeElement() {
+  leftHandleElement.addEventListener('mousedown', onMouseDown);
+  rightHandleElement.addEventListener('mousedown', onMouseDown);
+}
+
+function onMouseDown(evt) {
+  var handleElement = evt.target;
+
+  if (handleElement.classList.contains('range__btn--left')) {
+    handleInfo = leftHandleInfo;
+    handleInfo.maxPosition = rightHandleInfo.position;
+  } else if (handleElement.classList.contains('range__btn--right')) {
+    handleInfo = rightHandleInfo;
+    handleInfo.minPosition = leftHandleInfo.position;
+  }
+
+  handleInfo.handleElement = handleElement;
+  handleInfo.initialPosition = evt.clientX;
+  handleInfo.otherHandleElement.style.zIndex = 50;
+  handleInfo.handleElement.style.zIndex = 100;
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+}
+
+function onMouseMove(evt) {
+  var shift = evt.clientX - handleInfo.initialPosition;
+  var newPosition = handleInfo.handleElement.offsetLeft + shift;
+  handleInfo.initialPosition = evt.clientX;
+
+  if (newPosition < handleInfo.minPosition) {
+    newPosition = handleInfo.minPosition;
+  } else if (newPosition > handleInfo.maxPosition) {
+    newPosition = handleInfo.maxPosition;
+  }
+
+  handleInfo.handleElement.style.left = newPosition + 'px';
+  handleInfo.position = newPosition;
+
+  var newCenterCoordinate = newPosition + handleHalfWidth;
+  var centerCoordinateOnMaxRange = maxRangePosition + handleHalfWidth;
+  var percentHandlePosition = Math.round(
+      newCenterCoordinate / centerCoordinateOnMaxRange * 100
+  );
+
+  handleInfo.rangePriceElement.textContent = percentHandlePosition;
+
+  if (handleInfo.name === 'left') {
+    rangeLine.style.left = newCenterCoordinate + 'px';
+    handlesPercentPosition.left = percentHandlePosition;
+
+  } else if (handleInfo.name === 'right') {
+    rangeLine.style.right = (maxRangePosition - newPosition) + 'px';
+    handlesPercentPosition.right = percentHandlePosition;
   }
 }
 
-function changeSliderButtonPosition(button) {
-  if (button.classList.contains('range__btn--left')) {
-    button.style.left = '30%';
-    rangePriceMinElement.textContent = button.style.left.slice(0, -1);
-  } else {
-    button.style.left = '70%';
-    rangePriceMaxElement.textContent = button.style.left.slice(0, -1);
-  }
+function onMouseUp() {
+  document.removeEventListener('mousemove', onMouseMove);
+  document.removeEventListener('mouseup', onMouseUp);
 }
 
 function addListenerOnOrderElement() {

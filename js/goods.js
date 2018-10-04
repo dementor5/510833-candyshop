@@ -107,7 +107,6 @@ var maxRangePosition = rangeWidth - pinHalfWidth;
 var leftPinInfo;
 var rightPinInfo;
 var pinInfo;
-var pinsPercentPosition;
 
 var catalogElement = document.querySelector('.catalog__cards');
 var catalogLoadElement = catalogElement.querySelector('.catalog__load');
@@ -221,7 +220,9 @@ function changePinElementsZIndex() {
 function onMouseMove(evt) {
   calcNewPinCoords(evt.clientX);
   renderRangeDOMChanges();
-  pinsPercentPosition = getPinsPercentPosition();
+
+  // get percentPosition object
+  getPinsPercentPosition();
 }
 
 function calcNewPinCoords(newMouseCords) {

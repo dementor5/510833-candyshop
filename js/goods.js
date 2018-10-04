@@ -94,20 +94,20 @@ var mainHeaderBasketElement = document.querySelector('.main-header__basket');
 var rangeElement = document.querySelector('.range');
 var rangeFilter = rangeElement.querySelector('.range__filter');
 var rangeLine = rangeElement.querySelector('.range__fill-line');
-var leftHandleElement = rangeElement.querySelector('.range__btn--left');
-var rightHandleElement = rangeElement.querySelector('.range__btn--right');
+var leftPinElement = rangeElement.querySelector('.range__btn--left');
+var rightPinElement = rangeElement.querySelector('.range__btn--right');
 var rangePriceMinElement = rangeElement.querySelector('.range__price--min');
 var rangePriceMaxElement = rangeElement.querySelector('.range__price--max');
 
-var RANGE_WIDTH = rangeFilter.offsetWidth;
-var HANDLE_HALF_WIDTH = leftHandleElement.offsetWidth / 2;
-var MIN_RANGE_POSITION = -HANDLE_HALF_WIDTH;
-var MAX_RANGE_POSITION = RANGE_WIDTH - HANDLE_HALF_WIDTH;
+var rangeWidth = rangeFilter.offsetWidth;
+var pinHalfWidth = leftPinElement.offsetWidth / 2;
+var minRangePosition = -pinHalfWidth;
+var maxRangePosition = rangeWidth - pinHalfWidth;
 
-var leftHandleInfo;
-var rightHandleInfo;
-var handleInfo;
-var handlesPercentPosition = {};
+var leftPinInfo;
+var rightPinInfo;
+var pinInfo;
+var pinsPercentPosition;
 
 var catalogElement = document.querySelector('.catalog__cards');
 var catalogLoadElement = catalogElement.querySelector('.catalog__load');
@@ -167,88 +167,120 @@ disableOrderFieldsInHidedTab();
 setOrderFieldsState();
 
 function initRangeElement() {
-  makeHandleInfoObjects();
+  makePinInfos();
   addListenersOnRangeElement();
 }
 
-function makeHandleInfoObjects() {
-  leftHandleInfo = {
+function makePinInfos() {
+  leftPinInfo = {
     name: 'left',
-    otherHandleElement: rightHandleElement,
+    otherElement: rightPinElement,
     rangePriceElement: rangePriceMinElement,
-    position: getComputedStyle(leftHandleElement).left.slice(0, -2),
-    minPosition: MIN_RANGE_POSITION,
+    leftEdgePosition: parseInt(getComputedStyle(leftPinElement).left, 10),
+    minPosition: minRangePosition,
   };
 
-  rightHandleInfo = {
+  rightPinInfo = {
     name: 'right',
-    otherHandleElement: leftHandleElement,
+    otherElement: leftPinElement,
     rangePriceElement: rangePriceMaxElement,
-    position: getComputedStyle(rightHandleElement).left.slice(0, -2),
-    maxPosition: MAX_RANGE_POSITION
+    leftEdgePosition: parseInt(getComputedStyle(rightPinElement).left, 10),
+    maxPosition: maxRangePosition
   };
 }
 
 function addListenersOnRangeElement() {
-  leftHandleElement.addEventListener('mousedown', onMouseDown);
-  rightHandleElement.addEventListener('mousedown', onMouseDown);
+  leftPinElement.addEventListener('mousedown', onMouseDown);
+  rightPinElement.addEventListener('mousedown', onMouseDown);
 }
 
 function onMouseDown(evt) {
-  var handleElement = evt.target;
+  preparePinInfo(evt.target, evt.clientX);
+  changePinElementsZIndex();
+  switchGlobalMouseListeners('add');
+}
 
-  if (handleElement.classList.contains('range__btn--left')) {
-    handleInfo = leftHandleInfo;
-    handleInfo.maxPosition = rightHandleInfo.position;
-  } else if (handleElement.classList.contains('range__btn--right')) {
-    handleInfo = rightHandleInfo;
-    handleInfo.minPosition = leftHandleInfo.position;
+function preparePinInfo(element, initialPosition) {
+  if (element.classList.contains('range__btn--left')) {
+    pinInfo = leftPinInfo;
+    pinInfo.maxPosition = rightPinInfo.leftEdgePosition;
+  } else if (element.classList.contains('range__btn--right')) {
+    pinInfo = rightPinInfo;
+    pinInfo.minPosition = leftPinInfo.leftEdgePosition;
   }
 
-  handleInfo.handleElement = handleElement;
-  handleInfo.initialPosition = evt.clientX;
-  handleInfo.otherHandleElement.style.zIndex = 50;
-  handleInfo.handleElement.style.zIndex = 100;
+  pinInfo.element = element;
+  pinInfo.initialPosition = initialPosition;
+}
 
-  document.addEventListener('mousemove', onMouseMove);
-  document.addEventListener('mouseup', onMouseUp);
+function changePinElementsZIndex() {
+  pinInfo.otherElement.style.zIndex = 50;
+  pinInfo.element.style.zIndex = 100;
 }
 
 function onMouseMove(evt) {
-  var shift = evt.clientX - handleInfo.initialPosition;
-  var newPosition = handleInfo.handleElement.offsetLeft + shift;
-  handleInfo.initialPosition = evt.clientX;
+  calcNewPinCoords(evt.clientX);
+  renderRangeDOMChanges();
+  pinsPercentPosition = getPinsPercentPosition();
+}
 
-  if (newPosition < handleInfo.minPosition) {
-    newPosition = handleInfo.minPosition;
-  } else if (newPosition > handleInfo.maxPosition) {
-    newPosition = handleInfo.maxPosition;
+function calcNewPinCoords(newMouseCords) {
+  pinInfo.leftEdgePosition = getNewPosition(newMouseCords);
+  pinInfo.currentMiddleCoord = pinInfo.leftEdgePosition + pinHalfWidth;
+  pinInfo.currentPercentPosition =
+    Math.round(pinInfo.currentMiddleCoord / rangeWidth * 100);
+
+  return pinInfo;
+}
+
+function getNewPosition(newMousePosition) {
+  var shift = newMousePosition - pinInfo.initialPosition;
+  var newPosition = pinInfo.element.offsetLeft + shift;
+  pinInfo.initialPosition = newMousePosition;
+
+  if (newPosition < pinInfo.minPosition) {
+    newPosition = pinInfo.minPosition;
+  } else if (newPosition > pinInfo.maxPosition) {
+    newPosition = pinInfo.maxPosition;
   }
+  return newPosition;
+}
 
-  handleInfo.handleElement.style.left = newPosition + 'px';
-  handleInfo.position = newPosition;
+function renderRangeDOMChanges() {
+  pinInfo.element.style.left = pinInfo.leftEdgePosition + 'px';
+  pinInfo.rangePriceElement.textContent = pinInfo.currentPercentPosition;
 
-  var newCenterHandleCoordinate = newPosition + HANDLE_HALF_WIDTH;
-  var centerHandleCoordinateOnMaxRange = MAX_RANGE_POSITION + HANDLE_HALF_WIDTH;
-  var percentHandlePosition = Math.round(
-      newCenterHandleCoordinate / centerHandleCoordinateOnMaxRange * 100
-  );
+  if (pinInfo.name === 'left') {
+    rangeLine.style.left = pinInfo.currentMiddleCoord + 'px';
 
-  handleInfo.rangePriceElement.textContent = percentHandlePosition;
-
-  if (handleInfo.name === 'left') {
-    rangeLine.style.left = newCenterHandleCoordinate + 'px';
-    handlesPercentPosition.left = percentHandlePosition;
-
-  } else if (handleInfo.name === 'right') {
-    rangeLine.style.right = (MAX_RANGE_POSITION - newPosition) + 'px';
-    handlesPercentPosition.right = percentHandlePosition;
+  } else if (pinInfo.name === 'right') {
+    var rightCoord = maxRangePosition - pinInfo.leftEdgePosition;
+    rangeLine.style.right = rightCoord + 'px';
   }
 }
 
+function getPinsPercentPosition() {
+  return {
+    left: leftPinInfo.currentPercentPosition,
+    right: rightPinInfo.currentPercentPosition
+  };
+}
+
 function onMouseUp() {
-  document.removeEventListener('mousemove', onMouseMove);
-  document.removeEventListener('mouseup', onMouseUp);
+  switchGlobalMouseListeners('remove');
+}
+
+function switchGlobalMouseListeners(flag) {
+  switch (flag) {
+    case 'add':
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+      break;
+    case 'remove':
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      break;
+  }
 }
 
 function addListenerOnOrderElement() {

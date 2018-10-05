@@ -29,7 +29,8 @@
   renderCatalog();
 
   function renderCatalog() {
-    productsInCatalogInfo = window.data.getRandomProductsInfo(CATALOG_CARDS_COUNT);
+    productsInCatalogInfo =
+      window.data.getRandomProductsInfo(CATALOG_CARDS_COUNT);
     var fragmentWithCatalogCards =
       getFragmentWithCards(productsInCatalogInfo, createCatalogCardElement);
     catalogElement.classList.remove('catalog__cards--load');
@@ -226,7 +227,8 @@
   }
 
   function setBasketProductInfoAmount(basketCardElement, cardOrderCount) {
-    var title = basketCardElement.querySelector('.card-order__title').textContent;
+    var title =
+      basketCardElement.querySelector('.card-order__title').textContent;
     var catalogProductInfo = getProductInfo(title, productsInCatalogInfo);
     var basketProductInfo = getProductInfo(title, productsInBasketInfo);
     var sumAllAvailableProduct =
@@ -253,7 +255,8 @@
   }
 
   function changeBasketProductInfoAmount(basketCardElement, action, value) {
-    var title = basketCardElement.querySelector('.card-order__title').textContent;
+    var title =
+      basketCardElement.querySelector('.card-order__title').textContent;
     var basketProductInfo = getProductInfo(title, productsInBasketInfo);
     var catalogProductInfo = getProductInfo(title, productsInCatalogInfo);
 
@@ -275,7 +278,8 @@
   }
 
   function deleteBasketProduct(basketCardElement) {
-    var title = basketCardElement.querySelector('.card-order__title').textContent;
+    var title =
+      basketCardElement.querySelector('.card-order__title').textContent;
     var catalogProductInfo = getProductInfo(title, productsInCatalogInfo);
     var basketProductInfo = getProductInfo(title, productsInBasketInfo);
     var basketProductIndex = getProductInfoIndex(title, productsInBasketInfo);

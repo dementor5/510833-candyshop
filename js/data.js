@@ -117,7 +117,8 @@
 
   function generateComposition() {
     var availableIngredients = PRODUCT_INGREDIENTS.slice();
-    var countElementsToCut = getRandomInRange(0, availableIngredients.length - 1);
+    var countElementsToCut =
+      getRandomInRange(0, availableIngredients.length - 1);
 
     for (var i = 0; i < countElementsToCut; i++) {
       var randomIndex = getRandomInRange(0, availableIngredients.length - 1);

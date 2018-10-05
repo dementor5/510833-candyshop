@@ -1,6 +1,7 @@
 'use strict';
 
 (function () {
+
   var CARD_CODE_LENGTH = 16;
   var CVC_LENGTH = 3;
   var STORE_MAPS_PATH = 'img/map/';
@@ -8,6 +9,11 @@
   var DOWN_KEYCODE = 40;
 
   var orderFormElement = window.util.orderFormElement;
+
+  window.order = {
+    setOrderFieldsState: setOrderFieldsState
+  };
+
   var orderElement = orderFormElement.querySelector('.order');
 
   var contactFieldElements =
@@ -39,7 +45,6 @@
 
   var orderSubmitElement = orderFormElement.querySelector('.buy__submit-btn');
 
-
   var date = new Date();
   var month = date.getMonth();
   var year = date.getFullYear() - 2000;
@@ -47,9 +52,6 @@
   addListenerOnOrderElement();
   disableOrderFieldsInHidedTab();
 
-  window.order = {
-    setOrderFieldsState: setOrderFieldsState
-  };
 
   function addListenerOnOrderElement() {
     orderElement.addEventListener('change', function (evt) {

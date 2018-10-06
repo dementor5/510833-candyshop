@@ -82,14 +82,15 @@
   ];
 
   var PRODUCTS_PICTURES_PATH = 'img/cards/';
+  var CATALOG_CARDS_COUNT = 26;
 
   window.data = {
     getRandomProductsInfo: getRandomProductsInfo
   };
 
-  function getRandomProductsInfo(count) {
+  function getRandomProductsInfo() {
     var randomProducts = [];
-    for (var i = 0; i < count; i++) {
+    for (var i = 0; i < CATALOG_CARDS_COUNT; i++) {
       randomProducts.push(getOneRandomProductInfo());
     }
     return randomProducts;
@@ -97,19 +98,19 @@
 
   function getOneRandomProductInfo() {
     return {
-      name: getRandomUniqueArrayElement(PRODUCT_NAMES),
+      name: window.util.getRandomUniqueArrayElement(PRODUCT_NAMES),
       picture: PRODUCTS_PICTURES_PATH
-        + getRandomUniqueArrayElement(PRODUCT_PICTURES),
-      amount: getRandomInRange(0, 20),
-      price: getRandomInRange(100, 1500),
-      weight: getRandomInRange(30, 300),
+        + window.util.getRandomUniqueArrayElement(PRODUCT_PICTURES),
+      amount: window.util.getRandomInRange(0, 20),
+      price: window.util.getRandomInRange(100, 1500),
+      weight: window.util.getRandomInRange(30, 300),
       rating: {
-        value: getRandomInRange(1, 5),
-        number: getRandomInRange(10, 900)
+        value: window.util.getRandomInRange(1, 5),
+        number: window.util.getRandomInRange(10, 900)
       },
       nutritionFacts: {
-        sugar: getRandomBool(),
-        energy: getRandomInRange(70, 500)
+        sugar: window.util.getRandomBool(),
+        energy: window.util.getRandomInRange(70, 500)
       },
       contents: generateComposition()
     };
@@ -118,30 +119,13 @@
   function generateComposition() {
     var availableIngredients = PRODUCT_INGREDIENTS.slice();
     var countElementsToCut =
-      getRandomInRange(0, availableIngredients.length - 1);
+      window.util.getRandomInRange(0, availableIngredients.length - 1);
 
     for (var i = 0; i < countElementsToCut; i++) {
-      var randomIndex = getRandomInRange(0, availableIngredients.length - 1);
+      var randomIndex = window.util.getRandomInRange(0, availableIngredients.length - 1);
       availableIngredients.splice(randomIndex, 1);
     }
 
     return availableIngredients.join(', ');
-  }
-
-  function getRandomUniqueArrayElement(array) {
-    var min = 0;
-    var max = array.length - 1;
-    var randomIndex = getRandomInRange(min, max);
-    var element = array[randomIndex];
-    array.splice(randomIndex, 1);
-    return element;
-  }
-
-  function getRandomInRange(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  function getRandomBool() {
-    return Boolean(getRandomInRange(0, 1));
   }
 })();

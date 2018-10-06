@@ -1,22 +1,17 @@
 'use strict';
 
 (function () {
-  var CATALOG_CARDS_COUNT = 26;
   var CURRENCY_SIGN = '₽';
-
-  var orderFormElement = window.util.orderFormElement;
-  var setOrderFieldsState = window.order.setOrderFieldsState;
-  var getRandomProductsInfo = window.data.getRandomProductsInfo;
 
   var mainHeaderBasketElement = document.querySelector('.main-header__basket');
 
   var catalogElement = document.querySelector('.catalog__cards');
   var catalogLoadElement = catalogElement.querySelector('.catalog__load');
 
-  var goodsCardsElement = orderFormElement.querySelector('.goods__cards');
+  var goodsCardsElement = window.order.orderFormElement.querySelector('.goods__cards');
   var goodsCardEmptyElement = goodsCardsElement.querySelector('.goods__card-empty');
 
-  var goodsTotal = orderFormElement.querySelector('.goods__total');
+  var goodsTotal = window.order.orderFormElement.querySelector('.goods__total');
   var goodsTotalCount = goodsTotal.querySelector('.goods__total-count');
   var goodsPrice = goodsTotalCount.querySelector('.goods__price');
 
@@ -30,11 +25,11 @@
   var catalogCardsElements = [];
   var basketCardsElements = [];
 
-  setOrderFieldsState(productsInBasketInfo);
+  window.order.setOrderFieldsState(productsInBasketInfo);
   renderCatalog();
 
   function renderCatalog() {
-    productsInCatalogInfo = getRandomProductsInfo(CATALOG_CARDS_COUNT);
+    productsInCatalogInfo = window.data.getRandomProductsInfo();
     var fragmentWithCatalogCards =
       getFragmentWithCards(productsInCatalogInfo, createCatalogCardElement);
     catalogElement.classList.remove('catalog__cards--load');
@@ -379,7 +374,7 @@
         + orderResult.productsCount
         + ' товар'
         + orderResult.productEnding
-        + ' на сумму '
+        + ' на '
         + orderResult.totalPrice
         + ' '
         + CURRENCY_SIGN;

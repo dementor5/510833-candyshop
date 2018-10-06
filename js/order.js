@@ -5,15 +5,8 @@
   var CARD_CODE_LENGTH = 16;
   var CVC_LENGTH = 3;
   var STORE_MAPS_PATH = 'img/map/';
-  var UP_KEYCODE = 38;
-  var DOWN_KEYCODE = 40;
 
-  var orderFormElement = window.util.orderFormElement;
-
-  window.order = {
-    setOrderFieldsState: setOrderFieldsState
-  };
-
+  var orderFormElement = document.querySelector('.order_form');
   var orderElement = orderFormElement.querySelector('.order');
 
   var contactFieldElements =
@@ -51,6 +44,11 @@
 
   addListenerOnOrderElement();
   disableOrderFieldsInHidedTab();
+
+  window.order = {
+    orderFormElement: orderFormElement,
+    setOrderFieldsState: setOrderFieldsState
+  };
 
 
   function addListenerOnOrderElement() {
@@ -247,7 +245,8 @@
   }
 
   function disableInputModificationsByArrows(evt) {
-    if (evt.keyCode === UP_KEYCODE || evt.keyCode === DOWN_KEYCODE) {
+    if (evt.keyCode === window.util.UP_KEYCODE
+        || evt.keyCode === window.util.DOWN_KEYCODE) {
       evt.preventDefault();
     }
   }

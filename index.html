@@ -220,13 +220,14 @@
                 <div class="payment__inputs">
                   <div class="payment__card-group">
                     <p class="text-input text-input--light payment__input-wrap payment__input-wrap--card-number">
-                      <input type="number"
+                      <input type="text"
                              class="text-input__input"
                              name="card-number"
                              id="payment__card-number"
                              placeholder="Номер карты"
-                             min="1000000000000000"
-                             max="9999999999999999"
+                             minlength="16"
+                             maxlength="16"
+                             pattern="\d{16}"
                              required>
                       <label class="text-input__label" for="payment__card-number">Номер карты</label>
                     </p>
@@ -245,13 +246,14 @@
                     </p>
 
                     <p class="text-input text-input--light payment__input-wrap payment__input-wrap--cvc">
-                      <input type="number"
+                      <input type="text"
                              class="text-input__input"
                              name="card-cvc"
                              id="payment__card-cvc"
                              placeholder="CVC"
-                             min="100"
-                             max="999"
+                             minlength="3"
+                             maxlength="3"
+                             pattern="\d{3}"
                              required>
                       <label class="text-input__label text-input__label--lock" for="payment__card-cvc">CVC</label>
                     </p>

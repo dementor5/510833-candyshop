@@ -80,13 +80,8 @@
     'вилларибо',
     'виллабаджо'
   ];
-
   var PRODUCTS_PICTURES_PATH = 'img/cards/';
   var CATALOG_CARDS_COUNT = 26;
-
-  window.data = {
-    getRandomProductsInfo: getRandomProductsInfo
-  };
 
   function getRandomProductsInfo() {
     var randomProducts = [];
@@ -117,15 +112,19 @@
   }
 
   function generateComposition() {
-    var availableIngredients = PRODUCT_INGREDIENTS.slice();
+    var ingredients = PRODUCT_INGREDIENTS.slice();
     var countElementsToCut =
-      window.util.getRandomInRange(0, availableIngredients.length - 1);
+      window.util.getRandomInRange(0, ingredients.length - 1);
 
     for (var i = 0; i < countElementsToCut; i++) {
-      var randomIndex = window.util.getRandomInRange(0, availableIngredients.length - 1);
-      availableIngredients.splice(randomIndex, 1);
+      var randomIndex = window.util.getRandomInRange(0, ingredients.length - 1);
+      ingredients.splice(randomIndex, 1);
     }
 
-    return availableIngredients.join(', ');
+    return ingredients.join(', ');
   }
+
+  window.data = {
+    getRandomProductsInfo: getRandomProductsInfo
+  };
 })();

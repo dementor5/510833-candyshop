@@ -8,21 +8,37 @@
   var rightPinElement = rangeElement.querySelector('.range__btn--right');
   var rangePriceMinElement = rangeElement.querySelector('.range__price--min');
   var rangePriceMaxElement = rangeElement.querySelector('.range__price--max');
-
   var rangeWidth = rangeFilter.offsetWidth;
   var pinHalfWidth = leftPinElement.offsetWidth / 2;
   var minRangePosition = -pinHalfWidth;
   var maxRangePosition = rangeWidth - pinHalfWidth;
-
   var leftPinInfo;
   var rightPinInfo;
   var pinInfo;
 
   initRangeElement();
 
+  function addListenersOnRangeElement() {
+    leftPinElement.addEventListener('mousedown', onMouseDown);
+    rightPinElement.addEventListener('mousedown', onMouseDown);
+  }
+
+  function switchGlobalMouseListeners(flag) {
+    switch (flag) {
+      case 'add':
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        break;
+      case 'remove':
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        break;
+    }
+  }
+
   function initRangeElement() {
-    makePinInfos();
     addListenersOnRangeElement();
+    makePinInfos();
   }
 
   function makePinInfos() {
@@ -41,11 +57,6 @@
       leftEdgePosition: parseInt(getComputedStyle(rightPinElement).left, 10),
       maxPosition: maxRangePosition
     };
-  }
-
-  function addListenersOnRangeElement() {
-    leftPinElement.addEventListener('mousedown', onMouseDown);
-    rightPinElement.addEventListener('mousedown', onMouseDown);
   }
 
   function onMouseDown(evt) {
@@ -124,18 +135,5 @@
 
   function onMouseUp() {
     switchGlobalMouseListeners('remove');
-  }
-
-  function switchGlobalMouseListeners(flag) {
-    switch (flag) {
-      case 'add':
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-        break;
-      case 'remove':
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-        break;
-    }
   }
 })();

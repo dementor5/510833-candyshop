@@ -2,31 +2,72 @@
 
 (function () {
   var CURRENCY_SIGN = '₽';
-
   var mainHeaderBasketElement = document.querySelector('.main-header__basket');
-
   var catalogElement = document.querySelector('.catalog__cards');
   var catalogLoadElement = catalogElement.querySelector('.catalog__load');
-
-  var goodsCardsElement = window.order.orderFormElement.querySelector('.goods__cards');
-  var goodsCardEmptyElement = goodsCardsElement.querySelector('.goods__card-empty');
-
-  var goodsTotal = window.order.orderFormElement.querySelector('.goods__total');
+  var orderFormElement = window.order.getFormElement();
+  var goodsCardsElement = orderFormElement.querySelector('.goods__cards');
+  var goodsCardEmptyElement =
+    goodsCardsElement.querySelector('.goods__card-empty');
+  var goodsTotal = orderFormElement.querySelector('.goods__total');
   var goodsTotalCount = goodsTotal.querySelector('.goods__total-count');
   var goodsPrice = goodsTotalCount.querySelector('.goods__price');
-
   var catalogCardTemplateElement = document.querySelector('#card')
       .content.querySelector('.catalog__card');
   var basketCardTemplateElement = document.querySelector('#card-order')
       .content.querySelector('.goods_card');
-
   var productsInCatalogInfo = [];
   var productsInBasketInfo = [];
   var catalogCardsElements = [];
   var basketCardsElements = [];
 
-  window.order.setOrderFieldsState(productsInBasketInfo);
+  window.order.setFieldsState(productsInBasketInfo.length);
   renderCatalog();
+
+  function addListenerOnCatalogCardElement(catalogCardElement) {
+    catalogCardElement.addEventListener('click', function (evt) {
+
+      if (evt.target.classList.contains('card__btn-favorite')) {
+        evt.preventDefault();
+        toggleFavoriteButton(evt.target);
+      }
+
+      if (evt.target.classList.contains('card__btn')) {
+        evt.preventDefault();
+        changeModelStructure(evt.currentTarget.dataset.name, 1);
+      }
+
+    });
+  }
+
+  function addListenersOnBasketCard(baskedCardElement) {
+    baskedCardElement.addEventListener('click', function (evt) {
+      var name = evt.currentTarget.dataset.name;
+
+      if (evt.target.classList.contains('card-order__btn--increase')) {
+        changeModelStructure(name, 1);
+      }
+
+      if (evt.target.classList.contains('card-order__btn--decrease')) {
+        changeModelStructure(name, -1);
+      }
+
+      if (evt.target.classList.contains('card-order__close')) {
+        evt.preventDefault();
+        var amount = -getProductInfo(name, productsInBasketInfo).orderedAmount;
+        changeModelStructure(name, amount);
+      }
+    });
+
+    baskedCardElement.addEventListener('input', function (evt) {
+      if (evt.target.classList.contains('card-order__count')
+          && evt.target.value) {
+        var name = evt.currentTarget.dataset.name;
+        var difference = getDifference(name, evt.target);
+        changeModelStructure(name, difference);
+      }
+    });
+  }
 
   function renderCatalog() {
     productsInCatalogInfo = window.data.getRandomProductsInfo();
@@ -124,22 +165,6 @@
     return flag ? 'Содержит сахар. ' : 'Без сахара. ';
   }
 
-  function addListenerOnCatalogCardElement(catalogCardElement) {
-    catalogCardElement.addEventListener('click', function (evt) {
-
-      if (evt.target.classList.contains('card__btn-favorite')) {
-        evt.preventDefault();
-        toggleFavoriteButton(evt.target);
-      }
-
-      if (evt.target.classList.contains('card__btn')) {
-        evt.preventDefault();
-        changeModelStructure(evt.currentTarget.dataset.name, 1);
-      }
-
-    });
-  }
-
   function toggleFavoriteButton(button) {
     button.classList.toggle('card__btn-favorite--selected');
   }
@@ -195,15 +220,15 @@
     setAmountClass(catalogCardElement, catalogProductInfo.amount);
     setBasketMessage();
     renderOrderResults();
+    window.order.setFieldsState(productsInBasketInfo.length);
   }
 
   function getCardElement(name, cardsCollection) {
-    for (var i = 0; i < cardsCollection.length; i++) {
-      if (cardsCollection[i].dataset.name === name) {
-        return cardsCollection[i];
-      }
-    }
-    return null;
+    var cardsArray = Array.from(cardsCollection);
+
+    return cardsArray.find(function (item) {
+      return item.dataset.name === name;
+    });
   }
 
   function renderBasketCardElement(basketProductInfo) {
@@ -235,36 +260,6 @@
     return newBasketCard;
   }
 
-  function addListenersOnBasketCard(baskedCardElement) {
-    baskedCardElement.addEventListener('click', function (evt) {
-      var name = evt.currentTarget.dataset.name;
-
-      if (evt.target.classList.contains('card-order__btn--increase')) {
-        changeModelStructure(name, 1);
-      }
-
-      if (evt.target.classList.contains('card-order__btn--decrease')) {
-        changeModelStructure(name, -1);
-      }
-
-      if (evt.target.classList.contains('card-order__close')) {
-        evt.preventDefault();
-        var amount = -getProductInfo(name, productsInBasketInfo).orderedAmount;
-        changeModelStructure(name, amount);
-      }
-
-    });
-
-    baskedCardElement.addEventListener('input', function (evt) {
-      if (evt.target.classList.contains('card-order__count')
-          && evt.target.value) {
-        var name = evt.currentTarget.dataset.name;
-        var difference = getDifference(name, evt.target);
-        changeModelStructure(name, difference);
-      }
-    });
-  }
-
   function getDifference(name, orderCountElement) {
     var catalogProductInfo = getProductInfo(name, productsInCatalogInfo);
     var basketProductInfo = getProductInfo(name, productsInBasketInfo);
@@ -289,12 +284,9 @@
   }
 
   function getProductInfo(name, productsInfo) {
-    for (var i = 0; i < productsInfo.length; i++) {
-      if (productsInfo[i].name === name) {
-        return productsInfo[i];
-      }
-    }
-    return null;
+    return productsInfo.find(function (item) {
+      return item.name === name;
+    });
   }
 
   function setOrderCount(card, count) {

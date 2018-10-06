@@ -4,14 +4,6 @@
   var UP_KEYCODE = 38;
   var DOWN_KEYCODE = 40;
 
-  window.util = {
-    getRandomUniqueArrayElement: getRandomUniqueArrayElement,
-    getRandomInRange: getRandomInRange,
-    getRandomBool: getRandomBool,
-    UP_KEYCODE: UP_KEYCODE,
-    DOWN_KEYCODE: DOWN_KEYCODE
-  };
-
   function getRandomUniqueArrayElement(array) {
     var min = 0;
     var max = array.length - 1;
@@ -28,4 +20,12 @@
   function getRandomBool() {
     return Boolean(getRandomInRange(0, 1));
   }
+
+  window.util = {
+    getRandomUniqueArrayElement: getRandomUniqueArrayElement,
+    getRandomInRange: getRandomInRange,
+    getRandomBool: getRandomBool,
+    UP_KEYCODE: UP_KEYCODE,
+    DOWN_KEYCODE: DOWN_KEYCODE
+  };
 })();

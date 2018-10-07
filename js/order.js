@@ -6,6 +6,10 @@
   var orderElement = orderFormElement.querySelector('.order');
   var contactFieldElements =
     orderElement.querySelectorAll('.contact-data__inputs input');
+  var emailFieldEl = Array.from(contactFieldElements).find(function (item) {
+    return item.type === 'email';
+  });
+  var emailFieldName = emailFieldEl.name;
   var paymentTabSwitchElements =
     orderElement.querySelectorAll('.payment__method input');
   var paymentCardSwitchElement = orderElement.querySelector('#payment__card');
@@ -26,13 +30,40 @@
   var deliveryCourierElement = orderElement.querySelector('.deliver__courier');
   var deliveryRequestElement =
     deliveryCourierElement.querySelector('.deliver__entry-fields-wrap');
+  var floorFieldEl = deliveryRequestElement.querySelector('#deliver__floor');
+  var floorFieldName = floorFieldEl.name;
+  var descriptionEl =
+    deliveryRequestElement.querySelector('.deliver__textarea');
+  var descriptionName = descriptionEl.name;
   var orderSubmitElement = orderFormElement.querySelector('.buy__submit-btn');
   var date = new Date();
   var month = date.getMonth();
   var year = date.getFullYear() - 2000;
 
+  addListenerOnForm();
   addListenerOnOrderElement();
   disableSendOrderFieldsInHidedTab();
+
+  function addListenerOnForm() {
+    orderFormElement.addEventListener('submit', function (evt) {
+      checkOptionalFields();
+      var formData = new FormData(orderFormElement);
+
+      window.backend.upload(formData, function () {
+        alert('form send suseful');
+      }, function (errorMessage) {
+        alert(errorMessage);
+      });
+
+      evt.preventDefault();
+    });
+  }
+
+  function checkOptionalFields() {
+    emailFieldEl.name = emailFieldEl.value ? emailFieldName : '';
+    floorFieldEl.name = floorFieldEl.value ? floorFieldName : '';
+    descriptionEl.name = descriptionEl.value ? descriptionName : '';
+  }
 
   function addListenerOnOrderElement() {
     orderElement.addEventListener('input', function (evt) {

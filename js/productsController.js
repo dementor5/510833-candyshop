@@ -1,6 +1,7 @@
 'use strict';
 
 (function () {
+  var PRODUCTS_PICTURES_PATH = 'img/cards/';
   var CURRENCY_SIGN = '₽';
   var mainHeaderBasketElement = document.querySelector('.main-header__basket');
   var catalogElement = document.querySelector('.catalog__cards');
@@ -22,55 +23,17 @@
   var basketCardsElements = [];
 
   window.order.setFieldsState(productsInBasketInfo.length);
-  renderCatalog();
+  // onCatalogInfoLoad(window.data.getRandomProductsInfo());
+  window.backend.load(onCatalogInfoLoad, function (errorMessage) {
+    alert(errorMessage);
+  });
 
-  function addListenerOnCatalogCardElement(catalogCardElement) {
-    catalogCardElement.addEventListener('click', function (evt) {
-
-      if (evt.target.classList.contains('card__btn-favorite')) {
-        evt.preventDefault();
-        toggleFavoriteButton(evt.target);
-      }
-
-      if (evt.target.classList.contains('card__btn')) {
-        evt.preventDefault();
-        changeModelStructure(evt.currentTarget.dataset.name, 1);
-      }
-
-    });
-  }
-
-  function addListenersOnBasketCard(baskedCardElement) {
-    baskedCardElement.addEventListener('click', function (evt) {
-      var name = evt.currentTarget.dataset.name;
-
-      if (evt.target.classList.contains('card-order__btn--increase')) {
-        changeModelStructure(name, 1);
-      }
-
-      if (evt.target.classList.contains('card-order__btn--decrease')) {
-        changeModelStructure(name, -1);
-      }
-
-      if (evt.target.classList.contains('card-order__close')) {
-        evt.preventDefault();
-        var amount = -getProductInfo(name, productsInBasketInfo).orderedAmount;
-        changeModelStructure(name, amount);
-      }
-    });
-
-    baskedCardElement.addEventListener('input', function (evt) {
-      if (evt.target.classList.contains('card-order__count')
-          && evt.target.value) {
-        var name = evt.currentTarget.dataset.name;
-        var difference = getDifference(name, evt.target);
-        changeModelStructure(name, difference);
-      }
-    });
+  function onCatalogInfoLoad(catalogInfo) {
+    productsInCatalogInfo = catalogInfo;
+    renderCatalog();
   }
 
   function renderCatalog() {
-    productsInCatalogInfo = window.data.getRandomProductsInfo();
     var fragmentWithCatalogCards =
       getFragmentWithCards(productsInCatalogInfo, createCatalogCardElement);
     catalogElement.classList.remove('catalog__cards--load');
@@ -103,7 +66,7 @@
 
     newCatalogCard.dataset.name = product.name;
     cardTitleElement.textContent = product.name;
-    cardImageElement.src = product.picture;
+    cardImageElement.src = PRODUCTS_PICTURES_PATH + product.picture;
     cardImageElement.alt = product.name;
     cardPriceElement.firstChild.data = product.price + ' ';
     cardWeightElement.textContent = '/ ' + product.weight + ' Г';
@@ -134,6 +97,10 @@
     return ending;
   }
 
+  function getSugarStatusString(flag) {
+    return flag ? 'Содержит сахар. ' : 'Без сахара. ';
+  }
+
   function setRatingClass(element, productRating) {
     var className = null;
 
@@ -161,8 +128,20 @@
     }
   }
 
-  function getSugarStatusString(flag) {
-    return flag ? 'Содержит сахар. ' : 'Без сахара. ';
+  function addListenerOnCatalogCardElement(catalogCardElement) {
+    catalogCardElement.addEventListener('click', function (evt) {
+
+      if (evt.target.classList.contains('card__btn-favorite')) {
+        evt.preventDefault();
+        toggleFavoriteButton(evt.target);
+      }
+
+      if (evt.target.classList.contains('card__btn')) {
+        evt.preventDefault();
+        changeModelStructure(evt.currentTarget.dataset.name, 1);
+      }
+
+    });
   }
 
   function toggleFavoriteButton(button) {
@@ -249,15 +228,49 @@
 
     newBasketCard.dataset.name = basketProductInfo.name;
     cardTitle.textContent = basketProductInfo.name;
-    cardImage.src = basketProductInfo.picture;
+    cardImage.src = PRODUCTS_PICTURES_PATH + basketProductInfo.picture;
     cardImage.alt = basketProductInfo.name;
     cardPrice.textContent = basketProductInfo.price + ' ' + CURRENCY_SIGN;
+    orderCountElement.name = getOrderCountName(basketProductInfo.picture);
     orderCountElement.value = basketProductInfo.orderedAmount;
     orderCountElement.min = 0;
     orderCountElement.max = basketProductInfo.amount;
     addListenersOnBasketCard(newBasketCard);
 
     return newBasketCard;
+  }
+
+  function getOrderCountName(pictureName) {
+    return pictureName.replace(/\.[^.]+$/, '')
+  }
+
+  function addListenersOnBasketCard(baskedCardElement) {
+    baskedCardElement.addEventListener('click', function (evt) {
+      var name = evt.currentTarget.dataset.name;
+
+      if (evt.target.classList.contains('card-order__btn--increase')) {
+        changeModelStructure(name, 1);
+      }
+
+      if (evt.target.classList.contains('card-order__btn--decrease')) {
+        changeModelStructure(name, -1);
+      }
+
+      if (evt.target.classList.contains('card-order__close')) {
+        evt.preventDefault();
+        var amount = -getProductInfo(name, productsInBasketInfo).orderedAmount;
+        changeModelStructure(name, amount);
+      }
+    });
+
+    baskedCardElement.addEventListener('input', function (evt) {
+      if (evt.target.classList.contains('card-order__count')
+          && evt.target.value) {
+        var name = evt.currentTarget.dataset.name;
+        var difference = getDifference(name, evt.target);
+        changeModelStructure(name, difference);
+      }
+    });
   }
 
   function getDifference(name, orderCountElement) {

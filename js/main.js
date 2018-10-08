@@ -45,7 +45,6 @@
     button.classList.toggle('card__btn-favorite--selected');
   }
 
-  window.clearBasket = clearBasket;
   function clearBasket() {
     while (productsInBasketInfo[0]) {
       changeModelStructure(

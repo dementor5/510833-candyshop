@@ -80,8 +80,7 @@
     'вилларибо',
     'виллабаджо'
   ];
-  var PRODUCTS_PICTURES_PATH = 'img/cards/';
-  var CATALOG_CARDS_COUNT = 26;
+  var CATALOG_CARDS_COUNT = 28;
 
   function getRandomProductsInfo() {
     var randomProducts = [];
@@ -93,9 +92,8 @@
 
   function getOneRandomProductInfo() {
     return {
-      name: window.util.getRandomUniqueArrayElement(PRODUCT_NAMES),
-      picture: PRODUCTS_PICTURES_PATH
-        + window.util.getRandomUniqueArrayElement(PRODUCT_PICTURES),
+      name: window.util.getRandomUniqueArrayEl(PRODUCT_NAMES),
+      picture: window.util.getRandomUniqueArrayEl(PRODUCT_PICTURES),
       amount: window.util.getRandomInRange(0, 20),
       price: window.util.getRandomInRange(100, 1500),
       weight: window.util.getRandomInRange(30, 300),
@@ -113,10 +111,10 @@
 
   function generateComposition() {
     var ingredients = PRODUCT_INGREDIENTS.slice();
-    var countElementsToCut =
+    var countElsToCut =
       window.util.getRandomInRange(0, ingredients.length - 1);
 
-    for (var i = 0; i < countElementsToCut; i++) {
+    for (var i = 0; i < countElsToCut; i++) {
       var randomIndex = window.util.getRandomInRange(0, ingredients.length - 1);
       ingredients.splice(randomIndex, 1);
     }

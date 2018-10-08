@@ -2,48 +2,52 @@
 
 (function () {
   var STORE_MAPS_PATH = 'img/map/';
-  var orderFormElement = document.querySelector('.order_form');
-  var orderElement = orderFormElement.querySelector('.order');
-  var contactFieldElements =
-    orderElement.querySelectorAll('.contact-data__inputs input');
-  var paymentTabSwitchElements =
-    orderElement.querySelectorAll('.payment__method input');
-  var paymentCardSwitchElement = orderElement.querySelector('#payment__card');
-  var paymentCardElement = orderElement.querySelector('.payment__card-wrap');
-  var paymentFieldElements = paymentCardElement.querySelectorAll('input');
-  var cardStatusElement =
-    paymentCardElement.querySelector('.payment__card-status');
-  var paymentCashElement = orderElement.querySelector('.payment__cash-wrap');
-  var deliveryTabSwitchElements =
-    orderElement.querySelectorAll('.deliver__toggle input');
-  var deliveryStoreSwitchElement =
-    orderElement.querySelector('#deliver__store');
-  var deliveryStoreElement = orderElement.querySelector('.deliver__store');
-  var deliveryStoresElement =
-    deliveryStoreElement.querySelector('.deliver__stores');
-  var deliveryStoresMapElement =
-    deliveryStoreElement.querySelector('.deliver__store-map-img');
-  var deliveryCourierElement = orderElement.querySelector('.deliver__courier');
-  var deliveryRequestElement =
-    deliveryCourierElement.querySelector('.deliver__entry-fields-wrap');
-  var orderSubmitElement = orderFormElement.querySelector('.buy__submit-btn');
+  var orderFormEl = window.basket.getFormEl();
+  var orderEl = orderFormEl.querySelector('.order');
+  var contactFieldEls = orderEl.querySelectorAll('.contact-data__inputs input');
+  var emailFieldEl = Array.from(contactFieldEls).find(function (item) {
+    return item.type === 'email';
+  });
+  var emailFieldName = emailFieldEl.name;
+  var paymentTabSwitchEls = orderEl.querySelectorAll('.payment__method input');
+  var paymentCardSwitchEl = orderEl.querySelector('#payment__card');
+  var paymentCardEl = orderEl.querySelector('.payment__card-wrap');
+  var paymentFieldEls = paymentCardEl.querySelectorAll('input');
+  var cardStatusEl = paymentCardEl.querySelector('.payment__card-status');
+  var paymentCashEl = orderEl.querySelector('.payment__cash-wrap');
+  var deliveryTabSwitchEls = orderEl.querySelectorAll('.deliver__toggle input');
+  var deliveryStoreSwitchEl = orderEl.querySelector('#deliver__store');
+  var deliveryStoreEl = orderEl.querySelector('.deliver__store');
+  var deliveryStoresEl = deliveryStoreEl.querySelector('.deliver__stores');
+  var defaultStoreEl = deliveryStoreEl.querySelector('#store-academicheskaya');
+  var deliveryStoresMapEl =
+    deliveryStoreEl.querySelector('.deliver__store-map-img');
+  var deliveryCourierEl = orderEl.querySelector('.deliver__courier');
+  var deliveryRequestEl =
+    deliveryCourierEl.querySelector('.deliver__entry-fields-wrap');
+  var courierFieldEls = deliveryRequestEl.querySelectorAll('input, textarea');
+  var floorFieldEl = deliveryRequestEl.querySelector('#deliver__floor');
+  var floorFieldName = floorFieldEl.name;
+  var descriptionEl = deliveryRequestEl.querySelector('.deliver__textarea');
+  var descriptionName = descriptionEl.name;
+  var orderSubmitEl = orderFormEl.querySelector('.buy__submit-btn');
   var date = new Date();
-  var month = date.getMonth();
+  var month = date.getMonth() + 1;
   var year = date.getFullYear() - 2000;
 
-  addListenerOnOrderElement();
+  addListenerOnOrderEl();
   disableSendOrderFieldsInHidedTab();
 
-  function addListenerOnOrderElement() {
-    orderElement.addEventListener('input', function (evt) {
+  function addListenerOnOrderEl() {
+    orderEl.addEventListener('input', function (evt) {
       checkCardFieldsOnInput(evt.target);
     });
 
-    orderElement.addEventListener('change', function (evt) {
+    orderEl.addEventListener('change', function (evt) {
       if (evt.target.name === 'store') {
         changeStoreMap(evt.target.value);
       } else if (evt.target.classList.contains('toggle-btn__input')) {
-        switchTabsInOrderElement(evt.target.id);
+        switchTabsInOrderEl(evt.target.id);
       } else {
         checkFieldOnChange(evt.target);
       }
@@ -74,8 +78,8 @@
     element.value = element.value.replace(/[^\d\/]/, '');
   }
 
-  function filterCardDateField(cardDateElement) {
-    cardDateElement.value = cardDateElement.value
+  function filterCardDateField(cardDateEl) {
+    cardDateEl.value = cardDateEl.value
       .replace(/[^\d\/]/, '') // remove all except digits and /
       .replace(/^\//, '') // remove first /
       .replace(/^(\d{2})\d$/, '$1') // remove third digit
@@ -96,32 +100,32 @@
 
   function changeStoreMap(mapName) {
     var mapPath = STORE_MAPS_PATH + mapName + '.jpg';
-    deliveryStoresMapElement.src = mapPath;
+    deliveryStoresMapEl.src = mapPath;
   }
 
-  function switchTabsInOrderElement(flag) {
+  function switchTabsInOrderEl(flag) {
     switch (flag) {
       case 'payment__card':
-        paymentCashElement.classList.add('visually-hidden');
-        paymentCardElement.classList.remove('visually-hidden');
-        setElementsDisabledState(paymentFieldElements, false);
+        paymentCashEl.classList.add('visually-hidden');
+        paymentCardEl.classList.remove('visually-hidden');
+        setElsDisabledState(paymentFieldEls, false);
         break;
       case 'payment__cash':
-        paymentCardElement.classList.add('visually-hidden');
-        paymentCashElement.classList.remove('visually-hidden');
-        setElementsDisabledState(paymentFieldElements, true);
+        paymentCardEl.classList.add('visually-hidden');
+        paymentCashEl.classList.remove('visually-hidden');
+        setElsDisabledState(paymentFieldEls, true);
         break;
       case 'deliver__store':
-        deliveryCourierElement.classList.add('visually-hidden');
-        deliveryStoreElement.classList.remove('visually-hidden');
-        deliveryRequestElement.disabled = true;
-        deliveryStoresElement.disabled = false;
+        deliveryCourierEl.classList.add('visually-hidden');
+        deliveryStoreEl.classList.remove('visually-hidden');
+        deliveryRequestEl.disabled = true;
+        deliveryStoresEl.disabled = false;
         break;
       case 'deliver__courier':
-        deliveryStoreElement.classList.add('visually-hidden');
-        deliveryCourierElement.classList.remove('visually-hidden');
-        deliveryStoresElement.disabled = true;
-        deliveryRequestElement.disabled = false;
+        deliveryStoreEl.classList.add('visually-hidden');
+        deliveryCourierEl.classList.remove('visually-hidden');
+        deliveryStoresEl.disabled = true;
+        deliveryRequestEl.disabled = false;
         break;
     }
   }
@@ -143,8 +147,8 @@
   }
 
   function checkRelationToCard(id) {
-    for (var i = 0; i < paymentFieldElements.length; i++) {
-      if (paymentFieldElements[i].id === id) {
+    for (var i = 0; i < paymentFieldEls.length; i++) {
+      if (paymentFieldEls[i].id === id) {
         return true;
       }
     }
@@ -152,12 +156,12 @@
     return false;
   }
 
-  function checkCardNumberField(cardNumberElement) {
-    var validityMessage = getLuhnCheckResult(cardNumberElement.value)
+  function checkCardNumberField(cardNumberEl) {
+    var validityMessage = getLuhnCheckResult(cardNumberEl.value)
       ? ''
       : 'Номер карты указан не верно';
 
-    cardNumberElement.setCustomValidity(validityMessage);
+    cardNumberEl.setCustomValidity(validityMessage);
   }
 
   function getLuhnCheckResult(cardNumber) {
@@ -206,45 +210,93 @@
   }
 
   function checkCardFieldsValidState() {
-    for (var i = 0; i < paymentFieldElements.length; i++) {
-      if (!paymentFieldElements[i].validity.valid) {
+    for (var i = 0; i < paymentFieldEls.length; i++) {
+      if (!paymentFieldEls[i].validity.valid) {
+        cardStatusEl.textContent = 'Не определён';
         return;
       }
     }
 
-    cardStatusElement.textContent = 'Одобрен';
+    cardStatusEl.textContent = 'Одобрен';
   }
 
   function disableSendOrderFieldsInHidedTab() {
-    deliveryRequestElement.disabled = true;
+    deliveryRequestEl.disabled = true;
   }
 
   function setOrderFieldsState(productsInBasketCount) {
     var flag = productsInBasketCount ? false : true;
-    var element = deliveryStoreSwitchElement.checked
-      ? deliveryStoresElement
-      : deliveryRequestElement;
+    var element = deliveryStoreSwitchEl.checked
+      ? deliveryStoresEl
+      : deliveryRequestEl;
 
-    if (paymentCardSwitchElement.checked) {
-      setElementsDisabledState(paymentFieldElements, flag);
+    if (paymentCardSwitchEl.checked) {
+      setElsDisabledState(paymentFieldEls, flag);
     }
-    setElementsDisabledState(contactFieldElements, flag);
-    setElementsDisabledState(paymentTabSwitchElements, flag);
-    setElementsDisabledState(deliveryTabSwitchElements, flag);
+    setElsDisabledState(contactFieldEls, flag);
+    setElsDisabledState(paymentTabSwitchEls, flag);
+    setElsDisabledState(deliveryTabSwitchEls, flag);
     element.disabled = flag;
-    orderSubmitElement.disabled = flag;
+    orderSubmitEl.disabled = flag;
   }
 
-  function setElementsDisabledState(elements, flag) {
+  function setElsDisabledState(elements, flag) {
     elements.forEach(function (item) {
       item.disabled = flag;
     });
   }
 
+  function addListenerOnSubmitForm(clearBasketFunction) {
+    orderFormEl.addEventListener('submit', function (evt) {
+      switchEmptyOptionalFields();
+      var formData = new FormData(orderFormEl);
+
+      window.backend.upload(formData, function () {
+        window.popup.openSuccess();
+        setDefaultFormState();
+        clearBasketFunction();
+      }, function (errorMessage) {
+        window.popup.openError(errorMessage);
+      });
+
+      evt.preventDefault();
+    });
+  }
+
+  function switchEmptyOptionalFields() {
+    emailFieldEl.name = emailFieldEl.value ? emailFieldName : '';
+    floorFieldEl.name = floorFieldEl.value ? floorFieldName : '';
+    descriptionEl.name = descriptionEl.value ? descriptionName : '';
+  }
+
+  function setDefaultFormState() {
+    clearAllOrderFIelds();
+    changeTabsStateToDefault();
+    changeSelectedStoreToDefault();
+  }
+
+  function clearAllOrderFIelds() {
+    var allOrderFields = Array.from(contactFieldEls)
+      .concat(Array.from(paymentFieldEls), Array.from(courierFieldEls));
+    allOrderFields.forEach(function (item) {
+      item.value = '';
+    });
+  }
+
+  function changeTabsStateToDefault() {
+    paymentCardSwitchEl.checked = true;
+    switchTabsInOrderEl(paymentCardSwitchEl.id);
+    deliveryStoreSwitchEl.checked = true;
+    switchTabsInOrderEl(deliveryStoreSwitchEl.id);
+  }
+
+  function changeSelectedStoreToDefault() {
+    defaultStoreEl.checked = true;
+    changeStoreMap(defaultStoreEl.value);
+  }
+
   window.order = {
     setFieldsState: setOrderFieldsState,
-    getFormElement: function () {
-      return orderFormElement;
-    }
+    addListenerOnSubmitForm: addListenerOnSubmitForm
   };
 })();

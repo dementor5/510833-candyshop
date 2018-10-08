@@ -7,12 +7,15 @@
   left: 81%;
 }
 
-.card-order__count {
+.card-order__count,
+#deliver__floor {
   -moz-appearance:textfield;
 }
 
 .card-order__count::-webkit-outer-spin-button,
-.card-order__count::-webkit-inner-spin-button {
+.card-order__count::-webkit-inner-spin-button,
+#deliver__floor::-webkit-outer-spin-button,
+#deliver__floor::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }

@@ -2,7 +2,7 @@
 
 (function () {
   var STORE_MAPS_PATH = 'img/map/';
-  var orderFormEl = window.view.getFormEl();
+  var orderFormEl = window.basket.getFormEl();
   var orderEl = orderFormEl.querySelector('.order');
   var contactFieldEls = orderEl.querySelectorAll('.contact-data__inputs input');
   var emailFieldEl = Array.from(contactFieldEls).find(function (item) {

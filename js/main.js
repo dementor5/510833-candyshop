@@ -1,6 +1,7 @@
 'use strict';
 
 (function () {
+  var PRODUCTS_PICTURES_PATH = 'img/cards/';
   var productsInCatalogInfo = [];
   var productsInBasketInfo = [];
 
@@ -13,7 +14,15 @@
 
   function onCatalogInfoLoad(catalogInfo) {
     productsInCatalogInfo = catalogInfo;
-    window.view.renderCatalog(productsInCatalogInfo, addCatalogCardListener);
+    changeCatalogInfo();
+    window.catalog.render(productsInCatalogInfo, addCatalogCardListener);
+  }
+
+  function changeCatalogInfo() {
+    productsInCatalogInfo.forEach(function (item) {
+      item.id = item.picture.replace(/\.[^.]+$/, '');
+      item.picture = PRODUCTS_PICTURES_PATH + item.picture;
+    });
   }
 
   function addCatalogCardListener(catalogCardEl) {
@@ -42,9 +51,9 @@
     });
   }
 
-  function changeModelStructure(title, value) {
-    var catalogProductInfo = getProductInfo(title, productsInCatalogInfo);
-    var basketProductInfo = getProductInfo(title, productsInBasketInfo)
+  function changeModelStructure(name, value) {
+    var catalogProductInfo = getProductInfo(name, productsInCatalogInfo);
+    var basketProductInfo = getProductInfo(name, productsInBasketInfo)
       || createBasketProductInfo(catalogProductInfo);
 
     if (!catalogProductInfo.amount && value > 0) {
@@ -59,8 +68,8 @@
       productsInBasketInfo.splice(index, 1);
     }
 
-    window.view.changeDOM(
-        catalogProductInfo,
+    window.catalog.renderCardChanges(catalogProductInfo);
+    window.basket.renderChanges(
         basketProductInfo,
         productsInBasketInfo,
         addBasketCardListeners
@@ -71,6 +80,7 @@
     var basketProductInfo = Object.assign({}, catalogProductInfo);
 
     delete basketProductInfo.contents;
+    delete basketProductInfo.kind;
     delete basketProductInfo.nutritionFacts;
     delete basketProductInfo.rating;
     delete basketProductInfo.weight;

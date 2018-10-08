@@ -45,10 +45,14 @@
     button.classList.toggle('card__btn-favorite--selected');
   }
 
+  window.clearBasket = clearBasket;
   function clearBasket() {
-    Array.from(productsInBasketInfo).forEach(function (item) {
-      changeModelStructure(item.name, -item.orderedAmount);
-    });
+    while (productsInBasketInfo[0]) {
+      changeModelStructure(
+          productsInBasketInfo[0].name,
+          -productsInBasketInfo[0].orderedAmount
+      );
+    }
   }
 
   function changeModelStructure(name, value) {

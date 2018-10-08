@@ -8,7 +8,7 @@
   window.order.addListenerOnSubmitForm(clearBasket);
   // onCatalogInfoLoad(window.data.getRandomProductsInfo());
   window.backend.load(onCatalogInfoLoad, function (errorMessage) {
-    window.view.openErrorPopup(errorMessage);
+    window.popup.openError(errorMessage);
   });
 
   function onCatalogInfoLoad(catalogInfo) {

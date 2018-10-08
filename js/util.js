@@ -20,14 +20,16 @@
     return Boolean(getRandomInRange(0, 1));
   }
 
+  function isEscEvent(evt, action) {
+    if (evt.keyCode === ESC_KEYCODE) {
+      action();
+    }
+  }
+
   window.util = {
     getRandomUniqueArrayEl: getRandomUniqueArrayEl,
     getRandomInRange: getRandomInRange,
     getRandomBool: getRandomBool,
-    isEscEvent: function (evt, action) {
-      if (evt.keyCode === ESC_KEYCODE) {
-        action();
-      }
-    }
+    isEscEvent: isEscEvent
   };
 })();

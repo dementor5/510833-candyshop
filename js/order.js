@@ -252,11 +252,11 @@
       var formData = new FormData(orderFormEl);
 
       window.backend.upload(formData, function () {
-        window.view.openSuccessPopup();
+        window.popup.openSuccess();
         setDefaultFormState();
         clearBasketFunction();
       }, function (errorMessage) {
-        window.view.openErrorPopup(errorMessage);
+        window.popup.openError(errorMessage);
       });
 
       evt.preventDefault();

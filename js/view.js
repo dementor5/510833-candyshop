@@ -13,19 +13,12 @@
   var goodsTotal = orderFormEl.querySelector('.goods__total');
   var goodsTotalCount = goodsTotal.querySelector('.goods__total-count');
   var goodsPrice = goodsTotalCount.querySelector('.goods__price');
-  var modalErrorEl = document.querySelector('.modal--error');
-  var modalErrorMessageEl = modalErrorEl.querySelector('.modal__message');
-  var modalSuccessEl = document.querySelector('.modal--success');
-
   var catalogCardTemplateEl = document.querySelector('#card')
     .content.querySelector('.catalog__card');
   var basketCardTemplateEl = document.querySelector('#card-order')
     .content.querySelector('.goods_card');
-
   var catalogCardsEls = [];
   var basketCardsEls = [];
-
-  addListenersOnPopups();
 
   function renderCatalog(productsInCatalogInfo, addCatalogCardListener) {
     var fragmentWithCatalogCards =
@@ -66,8 +59,7 @@
     cardImageEl.alt = product.name;
     cardPriceEl.firstChild.data = product.price + ' ';
     cardWeightEl.textContent = '/ ' + product.weight + ' Г';
-    ratingEl.textContent =
-      'Рейтинг: ' + product.rating.value + ' звезд'
+    ratingEl.textContent = 'Рейтинг: ' + product.rating.value + ' звезд'
       + getStarEnding(product.rating.value);
     starCountEl.textContent = '(' + product.rating.number + ')';
     characteristicEl.textContent =
@@ -291,49 +283,13 @@
     }
   }
 
-  function addListenersOnPopups() {
-    modalErrorEl.addEventListener('click', onPopupCloseButtonClick);
-    modalSuccessEl.addEventListener('click', onPopupCloseButtonClick);
-
-  }
-
-  function onPopupCloseButtonClick(evt) {
-    if (evt.target.classList.contains('modal__close')) {
-      closePopups();
-    }
-  }
-
-  function openSuccessPopup() {
-    openPopup(modalSuccessEl);
-  }
-
-  function openErrorPopup(errorMessage) {
-    modalErrorMessageEl.textContent = errorMessage;
-    openPopup(modalErrorEl);
-  }
-
-  function openPopup(popup) {
-    popup.classList.remove('modal--hidden');
-    document.addEventListener('keydown', onPopupEscPress);
-  }
-
-  function onPopupEscPress(evt) {
-    window.util.isEscEvent(evt, closePopups);
-  }
-
-  function closePopups() {
-    modalErrorEl.classList.add('modal--hidden');
-    modalSuccessEl.classList.add('modal--hidden');
-    document.removeEventListener('keydown', onPopupEscPress);
+  function getFormEl() {
+    return orderFormEl;
   }
 
   window.view = {
-    getFormEl: function () {
-      return orderFormEl;
-    },
+    getFormEl: getFormEl,
     renderCatalog: renderCatalog,
-    changeDOM: changeDOM,
-    openSuccessPopup: openSuccessPopup,
-    openErrorPopup: openErrorPopup
+    changeDOM: changeDOM
   };
 })();

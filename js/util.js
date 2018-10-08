@@ -1,7 +1,9 @@
 'use strict';
 
 (function () {
-  function getRandomUniqueArrayElement(array) {
+  var ESC_KEYCODE = 27;
+
+  function getRandomUniqueArrayEl(array) {
     var min = 0;
     var max = array.length - 1;
     var randomIndex = getRandomInRange(min, max);
@@ -19,8 +21,13 @@
   }
 
   window.util = {
-    getRandomUniqueArrayElement: getRandomUniqueArrayElement,
+    getRandomUniqueArrayEl: getRandomUniqueArrayEl,
     getRandomInRange: getRandomInRange,
-    getRandomBool: getRandomBool
+    getRandomBool: getRandomBool,
+    isEscEvent: function (evt, action) {
+      if (evt.keyCode === ESC_KEYCODE) {
+        action();
+      }
+    }
   };
 })();

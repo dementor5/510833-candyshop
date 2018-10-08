@@ -1,26 +1,26 @@
 'use strict';
 
 (function () {
-  var rangeElement = document.querySelector('.range');
-  var rangeFilter = rangeElement.querySelector('.range__filter');
-  var rangeLine = rangeElement.querySelector('.range__fill-line');
-  var leftPinElement = rangeElement.querySelector('.range__btn--left');
-  var rightPinElement = rangeElement.querySelector('.range__btn--right');
-  var rangePriceMinElement = rangeElement.querySelector('.range__price--min');
-  var rangePriceMaxElement = rangeElement.querySelector('.range__price--max');
+  var rangeEl = document.querySelector('.range');
+  var rangeFilter = rangeEl.querySelector('.range__filter');
+  var rangeLine = rangeEl.querySelector('.range__fill-line');
+  var leftPinEl = rangeEl.querySelector('.range__btn--left');
+  var rightPinEl = rangeEl.querySelector('.range__btn--right');
+  var rangePriceMinEl = rangeEl.querySelector('.range__price--min');
+  var rangePriceMaxEl = rangeEl.querySelector('.range__price--max');
   var rangeWidth = rangeFilter.offsetWidth;
-  var pinHalfWidth = leftPinElement.offsetWidth / 2;
+  var pinHalfWidth = leftPinEl.offsetWidth / 2;
   var minRangePosition = -pinHalfWidth;
   var maxRangePosition = rangeWidth - pinHalfWidth;
   var leftPinInfo;
   var rightPinInfo;
   var pinInfo;
 
-  initRangeElement();
+  initRangeEl();
 
-  function addListenersOnRangeElement() {
-    leftPinElement.addEventListener('mousedown', onMouseDown);
-    rightPinElement.addEventListener('mousedown', onMouseDown);
+  function addListenersOnRangeEl() {
+    leftPinEl.addEventListener('mousedown', onMouseDown);
+    rightPinEl.addEventListener('mousedown', onMouseDown);
   }
 
   function switchGlobalMouseListeners(flag) {
@@ -36,32 +36,32 @@
     }
   }
 
-  function initRangeElement() {
-    addListenersOnRangeElement();
+  function initRangeEl() {
+    addListenersOnRangeEl();
     makePinInfos();
   }
 
   function makePinInfos() {
     leftPinInfo = {
       name: 'left',
-      otherElement: rightPinElement,
-      rangePriceElement: rangePriceMinElement,
-      leftEdgePosition: parseInt(getComputedStyle(leftPinElement).left, 10),
+      otherEl: rightPinEl,
+      rangePriceEl: rangePriceMinEl,
+      leftEdgePosition: parseInt(getComputedStyle(leftPinEl).left, 10),
       minPosition: minRangePosition,
     };
 
     rightPinInfo = {
       name: 'right',
-      otherElement: leftPinElement,
-      rangePriceElement: rangePriceMaxElement,
-      leftEdgePosition: parseInt(getComputedStyle(rightPinElement).left, 10),
+      otherEl: leftPinEl,
+      rangePriceEl: rangePriceMaxEl,
+      leftEdgePosition: parseInt(getComputedStyle(rightPinEl).left, 10),
       maxPosition: maxRangePosition
     };
   }
 
   function onMouseDown(evt) {
     preparePinInfo(evt.target, evt.clientX);
-    changePinElementsZIndex();
+    changePinElsZIndex();
     switchGlobalMouseListeners('add');
   }
 
@@ -78,8 +78,8 @@
     pinInfo.initialPosition = initialPosition;
   }
 
-  function changePinElementsZIndex() {
-    pinInfo.otherElement.style.zIndex = 50;
+  function changePinElsZIndex() {
+    pinInfo.otherEl.style.zIndex = 50;
     pinInfo.element.style.zIndex = 100;
   }
 
@@ -115,7 +115,7 @@
 
   function renderRangeDOMChanges() {
     pinInfo.element.style.left = pinInfo.leftEdgePosition + 'px';
-    pinInfo.rangePriceElement.textContent = pinInfo.currentPercentPosition;
+    pinInfo.rangePriceEl.textContent = pinInfo.currentPercentPosition;
 
     if (pinInfo.name === 'left') {
       rangeLine.style.left = pinInfo.currentMiddleCoord + 'px';

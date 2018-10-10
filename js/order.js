@@ -147,13 +147,11 @@
   }
 
   function checkRelationToCard(id) {
-    for (var i = 0; i < paymentFieldEls.length; i++) {
-      if (paymentFieldEls[i].id === id) {
-        return true;
-      }
-    }
+    var index = Array.from(paymentFieldEls).findIndex(function (it) {
+      return it.id === id;
+    });
 
-    return false;
+    return index > -1 ? true : false;
   }
 
   function checkCardNumberField(cardNumberEl) {
@@ -210,14 +208,12 @@
   }
 
   function checkCardFieldsValidState() {
-    for (var i = 0; i < paymentFieldEls.length; i++) {
-      if (!paymentFieldEls[i].validity.valid) {
-        cardStatusEl.textContent = 'Не определён';
-        return;
-      }
-    }
+    var invalidField = Array.from(paymentFieldEls).find(function (it) {
+      return it.validity.valid === false;
+    });
+    var statusMessage = invalidField ? 'Не определён' : 'Одобрен';
 
-    cardStatusEl.textContent = 'Одобрен';
+    cardStatusEl.textContent = statusMessage;
   }
 
   function disableSendOrderFieldsInHidedTab() {

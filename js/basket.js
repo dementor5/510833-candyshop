@@ -95,13 +95,12 @@
     var totalPrice = 0;
 
     if (productsInBasketInfo.length) {
-      for (var i = 0; i < productsInBasketInfo.length; i++) {
-        productsCount += productsInBasketInfo[i].orderedAmount;
-        var totalPositionPrice = productsInBasketInfo[i].orderedAmount
-          * productsInBasketInfo[i].price;
-        totalPrice += totalPositionPrice;
-      }
+      productsInBasketInfo.forEach(function (it) {
+        productsCount += it.orderedAmount;
+        totalPrice += it.orderedAmount * it.price;
+      });
     }
+
     return {
       productsCount: productsCount,
       totalPrice: totalPrice

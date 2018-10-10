@@ -38,10 +38,10 @@
   function getPackOfCatalogCards(data, addCatalogCardListener) {
     var fragment = document.createDocumentFragment();
 
-    for (var i = 0; i < data.length; i++) {
-      var cardEl = createCatalogCardEl(data[i], addCatalogCardListener);
+    data.forEach(function (it) {
+      var cardEl = createCatalogCardEl(it, addCatalogCardListener);
       fragment.appendChild(cardEl);
-    }
+    });
 
     return fragment;
   }

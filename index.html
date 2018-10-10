@@ -25,37 +25,37 @@
       <h2 class="visually-hidden">Каталог товаров</h2>
 
       <aside class="catalog__sidebar">
-        <form action="/">
+        <form class="filter_form"action="/">
 
           <ul class="catalog__filter">
             <li class="input-btn">
               <input class="input-btn__input visually-hidden input-btn__input--checkbox" name="food-type" value="icecream" type="checkbox" id="filter-icecream" >
               <label class="input-btn__label input-btn__label--checkbox" for="filter-icecream">Мороженное</label>
-              <span class="input-btn__item-count">(7)</span>
+              <span class="input-btn__item-count input-btn__item-count--icecream">(7)</span>
             </li>
 
             <li class="input-btn">
               <input class="input-btn__input visually-hidden input-btn__input--checkbox" name="food-type" value="soda" type="checkbox" id="filter-soda" >
               <label class="input-btn__label input-btn__label--checkbox" for="filter-soda">Газировка</label>
-              <span class="input-btn__item-count">(5)</span>
+              <span class="input-btn__item-count input-btn__item-count--soda">(5)</span>
             </li>
 
             <li class="input-btn">
               <input class="input-btn__input visually-hidden input-btn__input--checkbox" name="food-type" value="gum" type="checkbox" id="filter-gum" >
               <label class="input-btn__label input-btn__label--checkbox" for="filter-gum">Жевательная резинка</label>
-              <span class="input-btn__item-count">(6)</span>
+              <span class="input-btn__item-count input-btn__item-count--gum">(6)</span>
             </li>
 
             <li class="input-btn">
               <input class="input-btn__input visually-hidden input-btn__input--checkbox" name="food-type" value="marmalade" type="checkbox" id="filter-marmalade" >
               <label class="input-btn__label input-btn__label--checkbox" for="filter-marmalade">Мармелад</label>
-              <span class="input-btn__item-count">(7)</span>
+              <span class="input-btn__item-count input-btn__item-count--marmalade">(7)</span>
             </li>
 
             <li class="input-btn">
               <input class="input-btn__input visually-hidden input-btn__input--checkbox" name="food-type" value="marshmallows" type="checkbox" id="filter-marshmallows" >
               <label class="input-btn__label input-btn__label--checkbox" for="filter-marshmallows">Зефир</label>
-              <span class="input-btn__item-count">(6)</span>
+              <span class="input-btn__item-count input-btn__item-count--marshmallows">(6)</span>
             </li>
           </ul>
 
@@ -63,19 +63,19 @@
             <li class="input-btn">
               <input class="input-btn__input visually-hidden input-btn__input--checkbox" name="food-property" value="sugar-free" type="checkbox" id="filter-sugar-free" >
               <label class="input-btn__label input-btn__label--checkbox" for="filter-sugar-free">Без сахара</label>
-              <span class="input-btn__item-count">(5)</span>
+              <span class="input-btn__item-count input-btn__item-count--sugar-free">(5)</span>
             </li>
 
             <li class="input-btn">
               <input class="input-btn__input visually-hidden input-btn__input--checkbox" name="food-property" value="vegetarian" type="checkbox" id="filter-vegetarian" >
               <label class="input-btn__label input-btn__label--checkbox" for="filter-vegetarian">Вегетарианское</label>
-              <span class="input-btn__item-count">(0)</span>
+              <span class="input-btn__item-count input-btn__item-count--vegetarian">(0)</span>
             </li>
 
             <li class="input-btn">
               <input class="input-btn__input visually-hidden input-btn__input--checkbox" name="food-property" value="gluten-free" type="checkbox" id="filter-gluten-free" >
               <label class="input-btn__label input-btn__label--checkbox" for="filter-gluten-free">Безглютеновое</label>
-              <span class="input-btn__item-count">(3)</span>
+              <span class="input-btn__item-count input-btn__item-count--gluten-free">(3)</span>
             </li>
           </ul>
 
@@ -97,13 +97,13 @@
             <li class="input-btn">
               <input class="input-btn__input visually-hidden input-btn__input--checkbox" name="mark" value="favorite" type="checkbox" id="filter-favorite" >
               <label class="input-btn__label input-btn__label--checkbox" for="filter-favorite">Только избранное</label>
-              <span class="input-btn__item-count">(7)</span>
+              <span class="input-btn__item-count input-btn__item-count--favorite">(0)</span>
             </li>
 
             <li class="input-btn">
               <input class="input-btn__input visually-hidden input-btn__input--checkbox" name="mark" value="availability" type="checkbox" id="filter-availability" >
               <label class="input-btn__label input-btn__label--checkbox" for="filter-availability">В наличии</label>
-              <span class="input-btn__item-count">(7)</span>
+              <span class="input-btn__item-count input-btn__item-count--availability">(7)</span>
             </li>
           </ul>
 
@@ -519,6 +519,8 @@
   </template>
 
   <script src="js/slider.js"></script>
+  <script src="js/debounce.js"></script>
+  <script src="js/filter.js"></script>
   <script src="js/backend.js"></script>
   <script src="js/catalog.js"></script>
   <script src="js/basket.js"></script>

@@ -5,16 +5,34 @@
   var catalogLoadEl = catalogEl.querySelector('.catalog__load');
   var catalogCardTemplateEl = document.querySelector('#card')
     .content.querySelector('.catalog__card');
+  var catalogEmptyFiltersTemplateEl = document.querySelector('#empty-filters')
+    .content.querySelector('.catalog__empty-filter');
   var catalogCardsEls = [];
 
   function renderCatalog(productsInCatalogInfo, addCatalogCardListener) {
-    var fragmentWithCatalogCards =
-      getPackOfCatalogCards(productsInCatalogInfo, addCatalogCardListener);
+    if (catalogCardsEls.length) {
+      catalogCardsEls.forEach(function (it) {
+        it.remove();
+      });
+    }
 
     catalogEl.classList.remove('catalog__cards--load');
     catalogLoadEl.classList.add('visually-hidden');
-    catalogEl.appendChild(fragmentWithCatalogCards);
-    catalogCardsEls = catalogEl.querySelectorAll('.catalog__card');
+
+    if (!productsInCatalogInfo.length) {
+      var emptyCatalogEl = getCatalogEmptyCard();
+      catalogEl.appendChild(emptyCatalogEl);
+      catalogCardsEls = [emptyCatalogEl];
+    } else {
+      var fragmentWithCatalogCards =
+        getPackOfCatalogCards(productsInCatalogInfo, addCatalogCardListener);
+      catalogEl.appendChild(fragmentWithCatalogCards);
+      catalogCardsEls = catalogEl.querySelectorAll('.catalog__card');
+    }
+  }
+
+  function getCatalogEmptyCard() {
+    return catalogEmptyFiltersTemplateEl.cloneNode(true);
   }
 
   function getPackOfCatalogCards(data, addCatalogCardListener) {
@@ -39,6 +57,7 @@
       newCatalogCard.querySelector('.card__characteristic');
     var composition = newCatalogCard.querySelector('.card__composition-list');
     var ratingEl = newCatalogCard.querySelector('.stars__rating');
+    var favoriteButton = newCatalogCard.querySelector('.card__btn-favorite');
 
     newCatalogCard.dataset.name = product.name;
     cardTitleEl.textContent = product.name;
@@ -55,6 +74,9 @@
     composition.textContent = product.contents;
     setAmountClass(newCatalogCard, product.amount);
     setRatingClass(ratingEl, product.rating.value);
+    if (product.favorite) {
+      toggleFavoriteClass(favoriteButton);
+    }
     addCatalogCardListener(newCatalogCard);
 
     return newCatalogCard;
@@ -124,6 +146,10 @@
     }
   }
 
+  function toggleFavoriteClass(button) {
+    button.classList.toggle('card__btn-favorite--selected');
+  }
+
   function getCardEl(name, cardsCollection) {
     var cardsArray = Array.from(cardsCollection);
 
@@ -135,6 +161,7 @@
   window.catalog = {
     render: renderCatalog,
     renderCardChanges: renderCardChanges,
-    getCardEl: getCardEl
+    getCardEl: getCardEl,
+    toggleFavoriteClass: toggleFavoriteClass
   };
 })();

@@ -3,11 +3,9 @@
 (function () {
   var rangeEl = document.querySelector('.range');
   var rangeFilter = rangeEl.querySelector('.range__filter');
-  var rangeLine = rangeEl.querySelector('.range__fill-line');
+  var rangeLineEl = rangeEl.querySelector('.range__fill-line');
   var leftPinEl = rangeEl.querySelector('.range__btn--left');
   var rightPinEl = rangeEl.querySelector('.range__btn--right');
-  var rangePriceMinEl = rangeEl.querySelector('.range__price--min');
-  var rangePriceMaxEl = rangeEl.querySelector('.range__price--max');
   var rangeWidth = rangeFilter.offsetWidth;
   var pinHalfWidth = leftPinEl.offsetWidth / 2;
   var minRangePosition = -pinHalfWidth;
@@ -15,63 +13,63 @@
   var leftPinInfo;
   var rightPinInfo;
   var pinInfo;
+  var leftPinCallback;
+  var rightPinCallback;
+  var callback;
+  var currentValue;
 
-  initRangeEl();
-
-  function addListenersOnRangeEl() {
-    leftPinEl.addEventListener('mousedown', onMouseDown);
-    rightPinEl.addEventListener('mousedown', onMouseDown);
-  }
-
-  function switchGlobalMouseListeners(flag) {
-    switch (flag) {
-      case 'add':
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-        break;
-      case 'remove':
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-        break;
-    }
-  }
-
-  function initRangeEl() {
-    addListenersOnRangeEl();
+  function initRange(cb) {
+    callback = cb;
+    setInitStartPosition();
     makePinInfos();
+    addListenersOnRangeEl();
+  }
+
+  function setInitStartPosition() {
+    leftPinEl.style.left = minRangePosition + 'px';
+    rightPinEl.style.left = maxRangePosition + 'px';
+    rangeLineEl.style.left = minRangePosition + pinHalfWidth + 'px';
+    rangeLineEl.style.right = minRangePosition + pinHalfWidth + 'px';
   }
 
   function makePinInfos() {
     leftPinInfo = {
       name: 'left',
       otherEl: rightPinEl,
-      rangePriceEl: rangePriceMinEl,
       leftEdgePosition: parseInt(getComputedStyle(leftPinEl).left, 10),
       minPosition: minRangePosition,
+      currentPercentPosition: 0
     };
 
     rightPinInfo = {
       name: 'right',
       otherEl: leftPinEl,
-      rangePriceEl: rangePriceMaxEl,
       leftEdgePosition: parseInt(getComputedStyle(rightPinEl).left, 10),
-      maxPosition: maxRangePosition
+      maxPosition: maxRangePosition,
+      currentPercentPosition: 100
     };
+  }
+
+  function addListenersOnRangeEl() {
+    leftPinEl.addEventListener('mousedown', onMouseDown);
+    rightPinEl.addEventListener('mousedown', onMouseDown);
   }
 
   function onMouseDown(evt) {
     preparePinInfo(evt.target, evt.clientX);
     changePinElsZIndex();
-    switchGlobalMouseListeners('add');
+    addGlobalMouseListeners();
   }
 
   function preparePinInfo(element, initialPosition) {
     if (element.classList.contains('range__btn--left')) {
       pinInfo = leftPinInfo;
       pinInfo.maxPosition = rightPinInfo.leftEdgePosition;
+      pinInfo.callback = leftPinCallback;
     } else if (element.classList.contains('range__btn--right')) {
       pinInfo = rightPinInfo;
       pinInfo.minPosition = leftPinInfo.leftEdgePosition;
+      pinInfo.callback = rightPinCallback;
     }
 
     pinInfo.element = element;
@@ -83,21 +81,32 @@
     pinInfo.element.style.zIndex = 100;
   }
 
+  function addGlobalMouseListeners() {
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }
+
   function onMouseMove(evt) {
     calcNewPinCoords(evt.clientX);
     renderRangeDOMChanges();
+    if (currentValue !== pinInfo.currentPercentPosition) {
+      currentValue = pinInfo.currentPercentPosition;
+      returnPinPosition();
+    }
+  }
 
-    // get percentPosition object
-    getPinsPercentPosition();
+  function returnPinPosition() {
+    callback({
+      left: leftPinInfo.currentPercentPosition,
+      right: rightPinInfo.currentPercentPosition
+    });
   }
 
   function calcNewPinCoords(newMouseCords) {
     pinInfo.leftEdgePosition = getNewPosition(newMouseCords);
     pinInfo.currentMiddleCoord = pinInfo.leftEdgePosition + pinHalfWidth;
     pinInfo.currentPercentPosition =
-      Math.round(pinInfo.currentMiddleCoord / rangeWidth * 100);
-
-    return pinInfo;
+      pinInfo.currentMiddleCoord / rangeWidth * 100;
   }
 
   function getNewPosition(newMousePosition) {
@@ -115,25 +124,33 @@
 
   function renderRangeDOMChanges() {
     pinInfo.element.style.left = pinInfo.leftEdgePosition + 'px';
-    pinInfo.rangePriceEl.textContent = pinInfo.currentPercentPosition;
 
     if (pinInfo.name === 'left') {
-      rangeLine.style.left = pinInfo.currentMiddleCoord + 'px';
+      rangeLineEl.style.left = pinInfo.currentMiddleCoord + 'px';
 
     } else if (pinInfo.name === 'right') {
       var rightCoord = maxRangePosition - pinInfo.leftEdgePosition;
-      rangeLine.style.right = rightCoord + 'px';
+      rangeLineEl.style.right = rightCoord + 'px';
     }
   }
 
-  function getPinsPercentPosition() {
-    return {
-      left: leftPinInfo.currentPercentPosition,
-      right: rightPinInfo.currentPercentPosition
-    };
+  function onMouseUp() {
+    removeGlobalMouseListeners();
   }
 
-  function onMouseUp() {
-    switchGlobalMouseListeners('remove');
+  function removeGlobalMouseListeners() {
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
   }
+
+  function reset() {
+    setInitStartPosition();
+    makePinInfos();
+    returnPinPosition();
+  }
+
+  window.slider = {
+    initRange: initRange,
+    reset: reset
+  };
 })();

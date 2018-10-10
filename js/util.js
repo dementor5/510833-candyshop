@@ -26,10 +26,15 @@
     }
   }
 
+  function getMaxArrayValue(arr) {
+    return Math.max.apply(null, arr);
+  }
+
   window.util = {
     getRandomUniqueArrayEl: getRandomUniqueArrayEl,
     getRandomInRange: getRandomInRange,
     getRandomBool: getRandomBool,
-    isEscEvent: isEscEvent
+    isEscEvent: isEscEvent,
+    getMaxArrayValue: getMaxArrayValue
   };
 })();

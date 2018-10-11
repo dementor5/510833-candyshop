@@ -127,7 +127,9 @@
 
   function renderCardChanges(catalogProductInfo) {
     var catalogCardEl = getCardEl(catalogProductInfo.name, catalogCardsEls);
-    setAmountClass(catalogCardEl, catalogProductInfo.amount);
+    if (catalogCardEl) {
+      setAmountClass(catalogCardEl, catalogProductInfo.amount);
+    }
   }
 
   function setAmountClass(catalogCard, amount) {

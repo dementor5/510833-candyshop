@@ -9,7 +9,7 @@
   var filterFavoriteEl = filterForm.querySelector('#filter-favorite');
   var filterAvailabilityEl = filterForm.querySelector('#filter-availability');
   var popularFilterEl = filterForm.querySelector('#filter-popular');
-  var icecreamCountEl =
+  var iceCreamCountEl =
     filterForm.querySelector('.input-btn__item-count--icecream');
   var sodaCountEl = filterForm.querySelector('.input-btn__item-count--soda');
   var gumCountEl = filterForm.querySelector('.input-btn__item-count--gum');
@@ -134,7 +134,7 @@
     maxProductPrice = values.maxPrice;
     maxPrice = values.maxPrice;
     rangePriceMaxEl.textContent = values.maxPrice;
-    icecreamCountEl.textContent = '(' + values.icecreamCount + ')';
+    iceCreamCountEl.textContent = '(' + values.iceCreamCount + ')';
     sodaCountEl.textContent = '(' + values.sodaCount + ')';
     gumCountEl.textContent = '(' + values.gumCount + ')';
     marmaladeCountEl.textContent = '(' + values.marmaladeCount + ')';

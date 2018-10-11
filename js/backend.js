@@ -7,6 +7,7 @@
   var UPLOAD_URL = 'https://js.dump.academy/candyshop';
   var RESPONSE_TYPE = 'json';
   var XHR_TIMEOUT = 10000;
+  var SUCCESS_CODE = 200;
 
   function load(onLoad, onError) {
     var conf = {
@@ -41,7 +42,7 @@
 
   function addListeners(xhr, onLoad, onError) {
     xhr.addEventListener('load', function () {
-      if (xhr.status === 200) {
+      if (xhr.status === SUCCESS_CODE) {
         onLoad(xhr.response);
       } else {
         onError('Статус ответа: ' + xhr.status + ' ' + xhr.statusText);

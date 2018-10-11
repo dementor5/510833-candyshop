@@ -44,7 +44,7 @@
     var availableCount = productsInCatalogInfo.filter(function (it) {
       return it.amount;
     }).length;
-    var icecreamCount = productsInCatalogInfo.filter(function (it) {
+    var iceCreamCount = productsInCatalogInfo.filter(function (it) {
       return it.kind === 'Мороженое';
     }).length;
     var sodaCount = productsInCatalogInfo.filter(function (it) {
@@ -73,7 +73,7 @@
       maxPrice: maxPrice,
       count: count,
       availableCount: availableCount,
-      icecreamCount: icecreamCount,
+      iceCreamCount: iceCreamCount,
       sodaCount: sodaCount,
       gumCount: gumCount,
       marmaladeCount: marmaladeCount,

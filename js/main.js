@@ -2,7 +2,7 @@
 
 (function () {
   var PRODUCTS_PICTURES_PATH = 'img/cards/';
-  var InfoKindToFoodType = {
+  var infoKindToFoodType = {
     'Мороженое': 'icecream',
     'Газировка': 'soda',
     'Жевательная резинка': 'gum',
@@ -93,7 +93,7 @@
 
       if (evt.target.classList.contains('card__btn-favorite')) {
         evt.preventDefault();
-        markAsFavorite(evt.currentTarget.dataset.name);
+        toggleFavoriteStatus(evt.currentTarget.dataset.name);
         window.catalog.toggleFavoriteClass(evt.target);
       }
 
@@ -105,7 +105,7 @@
     });
   }
 
-  function markAsFavorite(name) {
+  function toggleFavoriteStatus(name) {
     var catalogProductInfo = getProductInfo(name, productsInCatalogInfo);
     catalogProductInfo.favorite = catalogProductInfo.favorite ? false : true;
     window.filter.renderFavoriteCount(getFavoriteCount());
@@ -120,17 +120,15 @@
 
   function clearBasket() {
     while (productsInBasketInfo[0]) {
-      changeModelStructure(
-          productsInBasketInfo[0].name,
-          -productsInBasketInfo[0].orderedAmount
-      );
+      changeModelStructure(productsInBasketInfo[0].name,
+          -productsInBasketInfo[0].orderedAmount);
     }
   }
 
   function changeModelStructure(name, value) {
     var catalogProductInfo = getProductInfo(name, productsInCatalogInfo);
     var basketProductInfo = getProductInfo(name, productsInBasketInfo)
-      || createBasketProductInfo(catalogProductInfo);
+        || createBasketProductInfo(catalogProductInfo);
 
     if (!catalogProductInfo.amount && value > 0) {
       return;
@@ -145,17 +143,15 @@
     }
 
     window.catalog.renderCardChanges(catalogProductInfo);
-    window.basket.renderChanges(
-        basketProductInfo,
-        productsInBasketInfo,
-        addBasketCardListeners
-    );
+    window.basket.renderChanges(basketProductInfo, productsInBasketInfo,
+        addBasketCardListeners);
   }
 
   function createBasketProductInfo(catalogProductInfo) {
     var basketProductInfo = Object.assign({}, catalogProductInfo);
 
     delete basketProductInfo.contents;
+    delete basketProductInfo.favorite;
     delete basketProductInfo.kind;
     delete basketProductInfo.nutritionFacts;
     delete basketProductInfo.rating;
@@ -199,11 +195,12 @@
     var catalogProductInfo = getProductInfo(name, productsInCatalogInfo);
     var basketProductInfo = getProductInfo(name, productsInBasketInfo);
 
-    var sumAllAvailableProduct =
-      catalogProductInfo.amount + basketProductInfo.orderedAmount;
+    var sumAllAvailableProduct = catalogProductInfo.amount
+        + basketProductInfo.orderedAmount;
 
-    orderCountEl.value =
-      normalizeOrderCountValue(orderCountEl.value, sumAllAvailableProduct);
+    orderCountEl.value = normalizeOrderCountValue(orderCountEl.value,
+        sumAllAvailableProduct);
+
     var difference = orderCountEl.value - basketProductInfo.orderedAmount;
 
     return difference;
@@ -215,6 +212,7 @@
     } else if (value < 0) {
       value = 0;
     }
+
     return value;
   }
 
@@ -253,71 +251,69 @@
       case 'expensive':
         sortByExpensive(newInfo);
         break;
-
       case 'cheep':
         sortByCheep(newInfo);
         break;
-
       case 'rating':
         sortByRating(newInfo);
         break;
     }
 
-    function checkFoodTypes(types, it) {
-      return !types || types.indexOf(InfoKindToFoodType[it.kind]) !== -1;
-    }
-
-    function checkSugar(flag, it) {
-      return !flag || !it.nutritionFacts.sugar;
-    }
-
-    function checkVegetarian(flag, it) {
-      return !flag || it.nutritionFacts.vegetarian;
-    }
-
-    function checkGluten(flag, it) {
-      return !flag || !it.nutritionFacts.gluten;
-    }
-
-    function checkMinPrice(prices, it) {
-      return !prices || prices.min === null || it.price >= prices.min;
-    }
-
-    function checkMaxPrice(prices, it) {
-      return !prices || prices.max === null || it.price <= prices.max;
-    }
-
-    function checkAvailability(marks, it) {
-      return !marks || marks[0] !== 'availability' || it.amount;
-    }
-
-    function checkIsFavorite(marks, it) {
-      return !marks || marks[0] !== 'favorite' || it.favorite;
-    }
-
-    function sortByExpensive(info) {
-      info.sort(function (a, b) {
-        return b.price - a.price;
-      });
-    }
-
-    function sortByCheep(info) {
-      info.sort(function (a, b) {
-        return a.price - b.price;
-      });
-    }
-
-    function sortByRating(info) {
-      info.sort(function (a, b) {
-        var result = b.rating.value - a.rating.value;
-        if (result === 0) {
-          result = b.rating.number - a.rating.number;
-        }
-        return result;
-      });
-    }
-
     window.filter.renderFoundCount(newInfo.length);
     window.catalog.render(newInfo, addCatalogCardListener);
+  }
+
+  function checkFoodTypes(types, it) {
+    return !types || types.indexOf(infoKindToFoodType[it.kind]) !== -1;
+  }
+
+  function checkSugar(flag, it) {
+    return !flag || !it.nutritionFacts.sugar;
+  }
+
+  function checkVegetarian(flag, it) {
+    return !flag || it.nutritionFacts.vegetarian;
+  }
+
+  function checkGluten(flag, it) {
+    return !flag || !it.nutritionFacts.gluten;
+  }
+
+  function checkMinPrice(prices, it) {
+    return !prices || prices.min === null || it.price >= prices.min;
+  }
+
+  function checkMaxPrice(prices, it) {
+    return !prices || prices.max === null || it.price <= prices.max;
+  }
+
+  function checkAvailability(marks, it) {
+    return !marks || marks[0] !== 'availability' || it.amount;
+  }
+
+  function checkIsFavorite(marks, it) {
+    return !marks || marks[0] !== 'favorite' || it.favorite;
+  }
+
+  function sortByExpensive(info) {
+    info.sort(function (a, b) {
+      return b.price - a.price;
+    });
+  }
+
+  function sortByCheep(info) {
+    info.sort(function (a, b) {
+      return a.price - b.price;
+    });
+  }
+
+  function sortByRating(info) {
+    info.sort(function (a, b) {
+      var result = b.rating.value - a.rating.value;
+      if (result === 0) {
+        result = b.rating.number - a.rating.number;
+      }
+      return result;
+    });
   }
 })();

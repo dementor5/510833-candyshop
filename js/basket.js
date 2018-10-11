@@ -11,18 +11,15 @@
   var goodsTotalCount = goodsTotal.querySelector('.goods__total-count');
   var goodsPrice = goodsTotalCount.querySelector('.goods__price');
   var basketCardTemplateEl = document.querySelector('#card-order')
-    .content.querySelector('.goods_card');
+      .content.querySelector('.goods_card');
   var basketCardsEls = [];
 
 
-  function renderBasketChanges(
-      basketProductInfo,
-      productsInBasketInfo,
-      addBasketCardListeners
-  ) {
+  function renderBasketChanges(basketProductInfo, productsInBasketInfo,
+      addBasketCardListeners) {
     var name = basketProductInfo.name;
     var basketCardEl = window.catalog.getCardEl(name, basketCardsEls)
-      || renderBasketCardEl(basketProductInfo, addBasketCardListeners);
+        || renderBasketCardEl(basketProductInfo, addBasketCardListeners);
 
     if (basketProductInfo.orderedAmount) {
       setOrderCount(basketCardEl, basketProductInfo.orderedAmount);

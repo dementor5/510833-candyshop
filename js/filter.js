@@ -53,10 +53,10 @@
     });
 
     filterForm.addEventListener('change', function (evt) {
-      if (evt.target.id === 'filter-favorite' && evt.target.checked === true) {
+      if (evt.target.id === 'filter-favorite' && evt.target.checked) {
         clearFilters('favorite');
       } else if (evt.target.id === 'filter-availability'
-                  && evt.target.checked === true) {
+          && evt.target.checked) {
         clearFilters('availability');
       }
       callback(getFormValues());
@@ -85,11 +85,13 @@
       minPrice = getPriceValue(newPinPosition.left);
       rangePriceMinEl.textContent = minPrice;
     }
+
     if (oldRightPinPosition !== newPinPosition.right) {
       oldRightPinPosition = newPinPosition.right;
       maxPrice = getPriceValue(newPinPosition.right);
       rangePriceMaxEl.textContent = maxPrice;
     }
+
     callback(getFormValues());
   }
 

@@ -53,13 +53,10 @@
     });
 
     filterForm.addEventListener('change', function (evt) {
-      if (
-        evt.target.id === 'filter-favorite' && evt.target.checked === true
-      ) {
+      if (evt.target.id === 'filter-favorite' && evt.target.checked === true) {
         clearFilters('favorite');
-      } else if (
-        evt.target.id === 'filter-availability' && evt.target.checked === true
-      ) {
+      } else if (evt.target.id === 'filter-availability'
+                  && evt.target.checked === true) {
         clearFilters('availability');
       }
       callback(getFormValues());
@@ -111,19 +108,20 @@
       values[name].push(value);
     });
 
-    if (!(minPrice === 0 && maxPrice === maxProductPrice)) {
-      values.price = {};
-
-      if (minPrice !== 0) {
-        values.price.min = minPrice;
-      }
-
-      if (maxPrice !== maxProductPrice) {
-        values.price.max = maxPrice;
-      }
-    }
+    values.priceLimits = getPriceLimits();
 
     return values;
+  }
+
+  function getPriceLimits() {
+    if (minPrice === 0 && maxPrice === maxProductPrice) {
+      return null;
+    }
+
+    return {
+      min: minPrice !== 0 ? minPrice : null,
+      max: maxPrice !== maxProductPrice ? maxPrice : null
+    };
   }
 
   function setMinPrice() {
@@ -150,7 +148,7 @@
     callback = window.debounce(cb, DEBOUNCE_INTERVAL);
   }
 
-  function renderFindedCount(count) {
+  function renderFoundCount(count) {
     rangeCountEl.textContent = '(' + count + ')';
   }
 
@@ -161,7 +159,7 @@
   window.filter = {
     setBoundaryValues: setBoundaryValues,
     setCallback: setCallback,
-    renderFindedCount: renderFindedCount,
+    renderFoundCount: renderFoundCount,
     renderFavoriteCount: renderFavoriteCount
   };
 })();

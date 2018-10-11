@@ -2,7 +2,7 @@
 
 (function () {
   var PRODUCTS_PICTURES_PATH = 'img/cards/';
-  var infoKindToFoodType = {
+  var InfoKindToFoodType = {
     'Мороженое': 'icecream',
     'Газировка': 'soda',
     'Жевательная резинка': 'gum',
@@ -14,8 +14,8 @@
 
   window.order.setFieldsState(productsInBasketInfo.length);
   window.order.addListenerOnSubmitForm(clearBasket);
-  // onLoadDone(window.data.getRandomProductsInfo());
-  window.backend.load(onLoadDone, onError);
+  onLoadDone(window.data.getRandomProductsInfo());
+  // window.backend.load(onLoadDone, onError);
 
 
   function onLoadDone(catalogInfo) {
@@ -23,7 +23,7 @@
     changeCatalogInfo();
     var boundaryValues = calculateBoundaryValues();
     window.filter.setBoundaryValues(boundaryValues);
-    window.filter.setCallback(doFiltring);
+    window.filter.setCallback(doFiltering);
     window.catalog.render(productsInCatalogInfo, addCatalogCardListener);
   }
 
@@ -224,98 +224,100 @@
     });
   }
 
-  function doFiltring(values) {
+  function doFiltering(values) {
     var newInfo = productsInCatalogInfo.slice();
-    var foodType = values['food-type'];
-    var foodProperty = values['food-property'];
-    var price = values.price;
+    var foodTypes = values['food-type'];
+    var foodPropertys = values['food-property'];
+    var priceLimits = values.priceLimits;
+    var markLimits = values.mark;
     var sort = values.sort[0];
-    var mark = values.mark;
 
-    if (foodType) {
-      newInfo = productsInCatalogInfo.filter(function (it) {
-        var result = foodType.indexOf(infoKindToFoodType[it.kind]);
-        return result > -1;
+    if (foodPropertys) {
+      var checkSugarFlag = foodPropertys.indexOf('sugar-free') !== -1;
+      var checkVegetarianFlag = foodPropertys.indexOf('vegetarian') !== -1;
+      var checkGlutenFlag = foodPropertys.indexOf('gluten-free') !== -1;
+    }
+
+    newInfo = newInfo.filter(function (it) {
+      return checkFoodTypes(foodTypes, it)
+        && checkSugar(checkSugarFlag, it)
+        && checkVegetarian(checkVegetarianFlag, it)
+        && checkGluten(checkGlutenFlag, it)
+        && checkMinPrice(priceLimits, it)
+        && checkMaxPrice(priceLimits, it)
+        && checkAvailability(markLimits, it)
+        && checkIsFavorite(markLimits, it);
+    });
+
+    switch (sort) {
+      case 'expensive':
+        sortByExpensive(newInfo);
+        break;
+
+      case 'cheep':
+        sortByCheep(newInfo);
+        break;
+
+      case 'rating':
+        sortByRating(newInfo);
+        break;
+    }
+
+    function checkFoodTypes(types, it) {
+      return !types || types.indexOf(InfoKindToFoodType[it.kind]) !== -1;
+    }
+
+    function checkSugar(flag, it) {
+      return !flag || !it.nutritionFacts.sugar;
+    }
+
+    function checkVegetarian(flag, it) {
+      return !flag || it.nutritionFacts.vegetarian;
+    }
+
+    function checkGluten(flag, it) {
+      return !flag || !it.nutritionFacts.gluten;
+    }
+
+    function checkMinPrice(prices, it) {
+      return !prices || prices.min === null || it.price >= prices.min;
+    }
+
+    function checkMaxPrice(prices, it) {
+      return !prices || prices.max === null || it.price <= prices.max;
+    }
+
+    function checkAvailability(marks, it) {
+      return !marks || marks[0] !== 'availability' || it.amount;
+    }
+
+    function checkIsFavorite(marks, it) {
+      return !marks || marks[0] !== 'favorite' || it.favorite;
+    }
+
+    function sortByExpensive(info) {
+      info.sort(function (a, b) {
+        return b.price - a.price;
       });
     }
 
-    if (foodProperty) {
-      var checkSugar = foodProperty.indexOf('sugar-free');
-      var checkVegetarian = foodProperty.indexOf('vegetarian');
-      var checkGluten = foodProperty.indexOf('gluten-free');
-
-      if (checkSugar > -1) {
-        newInfo = newInfo.filter(function (it) {
-          return !it.nutritionFacts.sugar;
-        });
-      }
-
-      if (checkVegetarian > -1) {
-        newInfo = newInfo.filter(function (it) {
-          return it.nutritionFacts.vegetarian;
-        });
-      }
-
-      if (checkGluten > -1) {
-        newInfo = newInfo.filter(function (it) {
-          return !it.nutritionFacts.gluten;
-        });
-      }
+    function sortByCheep(info) {
+      info.sort(function (a, b) {
+        return a.price - b.price;
+      });
     }
 
-    if (price) {
-      if (price.min !== undefined) {
-        newInfo = newInfo.filter(function (it) {
-          return it.price >= price.min;
-        });
-      }
-
-      if (price.max !== undefined) {
-        newInfo = newInfo.filter(function (it) {
-          return it.price <= price.max;
-        });
-      }
+    function sortByRating(info) {
+      info.sort(function (a, b) {
+        var result = b.rating.value - a.rating.value;
+        if (result === 0) {
+          result = b.rating.number - a.rating.number;
+        }
+        return result;
+      });
     }
 
-    if (mark) {
-      if (mark[0] === 'availability') {
-        newInfo = newInfo.filter(function (it) {
-          return it.amount;
-        });
-      } else if (mark[0] === 'favorite') {
-        newInfo = newInfo.filter(function (it) {
-          return it.favorite;
-        });
-      }
-    }
-
-    if (sort !== 'popular') {
-      switch (sort) {
-        case 'expensive':
-          newInfo.sort(function (a, b) {
-            return b.price - a.price;
-          });
-          break;
-
-        case 'cheep':
-          newInfo.sort(function (a, b) {
-            return a.price - b.price;
-          });
-          break;
-
-        case 'rating':
-          newInfo.sort(function (a, b) {
-            var result = b.rating.value - a.rating.value;
-            if (result === 0) {
-              result = b.rating.number - a.rating.number;
-            }
-            return result;
-          });
-          break;
-      }
-    }
-
-    window.filter.renderFindedCount(newInfo.length);
+    window.filter.renderFoundCount(newInfo.length);
     window.catalog.render(newInfo, addCatalogCardListener);
   }
 })();

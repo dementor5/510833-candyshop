@@ -14,8 +14,8 @@
 
   window.order.setFieldsState(productsInBasketInfo.length);
   window.order.addListenerOnSubmitForm(clearBasket);
-  onLoadDone(window.data.getRandomProductsInfo());
-  // window.backend.load(onLoadDone, onError);
+  // onLoadDone(window.data.getRandomProductsInfo());
+  window.backend.load(onLoadDone, onError);
 
 
   function onLoadDone(catalogInfo) {

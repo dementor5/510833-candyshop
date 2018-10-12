@@ -57,7 +57,9 @@
       newCatalogCard.querySelector('.card__characteristic');
     var composition = newCatalogCard.querySelector('.card__composition-list');
     var ratingEl = newCatalogCard.querySelector('.stars__rating');
-    var favoriteButton = newCatalogCard.querySelector('.card__btn-favorite');
+    var favoriteButtonEl = newCatalogCard.querySelector('.card__btn-favorite');
+    var compositionListEl =
+      newCatalogCard.querySelector('.card__composition-list');
 
     newCatalogCard.dataset.name = product.name;
     cardTitleEl.textContent = product.name;
@@ -69,13 +71,17 @@
       + getStarEnding(product.rating.value);
     starCountEl.textContent = '(' + product.rating.number + ')';
     characteristicEl.textContent =
-      getSugarStatusString(product.nutritionFacts.sugar)
-      + product.nutritionFacts.energy + ' ккал';
+        getSugarStatusString(product.nutritionFacts.sugar)
+        + getGlutenStatusString(product.nutritionFacts.gluten)
+        + getVegeterianString(product.nutritionFacts.vegetarian)
+        + product.nutritionFacts.energy
+        + ' ккал';
     composition.textContent = product.contents;
     setAmountClass(newCatalogCard, product.amount);
     setRatingClass(ratingEl, product.rating.value);
+    compositionListEl.textContent = product.nutritionFacts.contents;
     if (product.favorite) {
-      toggleFavoriteClass(favoriteButton);
+      toggleFavoriteClass(favoriteButtonEl);
     }
     addCatalogCardListener(newCatalogCard);
 
@@ -95,7 +101,15 @@
   }
 
   function getSugarStatusString(flag) {
-    return flag ? 'Содержит сахар. ' : 'Без сахара. ';
+    return flag ? 'Содержит сахар, ' : 'Без сахара, ';
+  }
+
+  function getGlutenStatusString(flag) {
+    return flag ? 'содержит глютен, ' : ' без глютена, ';
+  }
+
+  function getVegeterianString(flag) {
+    return flag ? 'вегетарианское. ' : 'не вегетарианское. ';
   }
 
   function setRatingClass(element, productRating) {
@@ -152,6 +166,11 @@
     button.classList.toggle('card__btn-favorite--selected');
   }
 
+  function toggleCompositionHiddenClass(card) {
+    var cardComposition = card.querySelector('.card__composition');
+    cardComposition.classList.toggle('card__composition--hidden');
+  }
+
   function getCardEl(name, cardsCollection) {
     var cardsArray = Array.from(cardsCollection);
 
@@ -164,6 +183,7 @@
     render: renderCatalog,
     renderCardChanges: renderCardChanges,
     getCardEl: getCardEl,
-    toggleFavoriteClass: toggleFavoriteClass
+    toggleFavoriteClass: toggleFavoriteClass,
+    toggleCompositionHiddenClass: toggleCompositionHiddenClass
   };
 })();

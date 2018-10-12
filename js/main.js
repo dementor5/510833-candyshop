@@ -101,6 +101,10 @@
         changeModelStructure(evt.currentTarget.dataset.name, 1);
       }
 
+      if (evt.target.classList.contains('card__btn-composition')) {
+        window.catalog.toggleCompositionHiddenClass(evt.currentTarget);
+      }
+
     });
   }
 

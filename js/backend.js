@@ -16,8 +16,8 @@
       onLoad: onLoad,
       onError: onError
     };
-    var xhr = new XMLHttpRequest();
-    prepareXhr(xhr, conf);
+    var xhr = createXhr(conf);
+
     xhr.send();
   }
 
@@ -28,16 +28,20 @@
       onLoad: onLoad,
       onError: onError
     };
-    var xhr = new XMLHttpRequest();
-    prepareXhr(xhr, conf);
+    var xhr = createXhr(conf);
+
     xhr.send(data);
   }
 
-  function prepareXhr(xhr, conf) {
+  function createXhr(conf) {
+    var xhr = new XMLHttpRequest();
+
     xhr.responseType = RESPONSE_TYPE;
     xhr.timeout = XHR_TIMEOUT;
     xhr.open(conf.method, conf.URL);
     addListeners(xhr, conf.onLoad, conf.onError);
+
+    return xhr;
   }
 
   function addListeners(xhr, onLoad, onError) {
